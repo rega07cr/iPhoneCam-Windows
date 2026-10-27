@@ -1,0 +1,10 @@
+cert.pem
+key.pem
+snapshots/
+dist/
+build/
+*.spec
+__pycache__/
+*.pyc
+iphone-cam-windows.zip
+server.log

@@ -1,0 +1,52 @@
+name: Build Windows EXE
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build EXE
+        run: |
+          pyinstaller --noconfirm --clean --onefile --name iPhoneCam `
+            --add-data "dashboard.html;." --add-data "phone.html;." `
+            app.py
+
+      - name: Package portable zip
+        shell: pwsh
+        run: |
+          Copy-Item README.md dist/
+          Copy-Item LICENSE dist/
+          Compress-Archive -Path dist/iPhoneCam.exe, dist/README.md, dist/LICENSE `
+            -DestinationPath iPhoneCam-portable.zip -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iPhoneCam-windows
+          path: |
+            dist/iPhoneCam.exe
+            iPhoneCam-portable.zip
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/iPhoneCam.exe
+            iPhoneCam-portable.zip
+          generate_release_notes: true

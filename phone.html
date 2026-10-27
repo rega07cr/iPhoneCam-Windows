@@ -1,0 +1,114 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>iPhoneCam · iPhone</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#000;color:#fff;font-family:system-ui;text-align:center;padding:16px;min-height:100vh}
+.badge{display:inline-block;font-size:12px;background:#16213a;border:1px solid #2b3c63;border-radius:999px;padding:5px 12px;color:#9db4e8;margin-bottom:10px}
+#v{width:100%;max-height:52vh;background:#111;border-radius:14px;border:1px solid #222}
+#v.mirror{transform:scaleX(-1)}
+button{font-size:17px;padding:13px 22px;border-radius:14px;border:0;font-weight:700;background:linear-gradient(135deg,#22d3ee,#a5b4fc);color:#001018;margin:4px}
+button.ghost{background:#161616;color:#fff;border:1px solid #333}button:disabled{opacity:.4}
+#st{margin-top:10px;color:#9aa4c7;font-size:14px;min-height:20px}
+.row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+select{background:#111;color:#fff;border:1px solid #333;border-radius:10px;padding:10px;font-size:15px}
+.hint{font-size:12px;color:#667;margin-top:14px;line-height:1.6}
+.live{color:#34d399;font-weight:700}
+</style></head>
+<body>
+<div class="badge">📷 iPhoneCam · collegato al PC</div><br>
+<video id="v" autoplay muted playsinline></video><br>
+<div class="row"><select id="cam"><option value="environment">Posteriore</option><option value="user">Frontale</option></select>
+<select id="qual"><option value="1280x720">HD 720p</option><option value="1920x1080" selected>Full HD 1080p</option><option value="640x480">SD 480p</option></select></div><br>
+<button id="go">▶ Avvia Camera</button>
+<div class="row"><button class="ghost" id="bTorch" disabled>🔦 Torcia</button><button class="ghost" id="bSwitch" disabled>🔄 Camera</button><button class="ghost" id="bSnap" disabled>📸 Foto</button></div>
+<div id="st">Tocca Avvia → Consenti fotocamera e microfono</div>
+<p class="hint">Tieni Safari aperto e lo schermo acceso.<br>Torcia, camera e qualità si controllano anche dal PC.</p>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const st=m=>$('st').innerHTML=m;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let pc=null,stream=null,sender=null,videoTrack=null,iceN=0,ctlN=0,torchOn=false,running=false;
+async function api(p,o){const r=await fetch(p,Object.assign({headers:{'Content-Type':'application/json'}},o||{}));return r.json();}
+async function evt(e){try{await api('/api/event',{method:'POST',body:JSON.stringify(e)});}catch{}}
+function applyMirror(){$('v').classList.toggle('mirror',$('cam').value==='user');}
+$('cam').onchange=applyMirror;
+async function startStream(){
+  const[w,h]=$('qual').value.split('x').map(Number);
+  const c={video:{facingMode:$('cam').value,width:{ideal:w},height:{ideal:h},frameRate:{ideal:30}},audio:{echoCancellation:true,noiseSuppression:true}};
+  const ns=await navigator.mediaDevices.getUserMedia(c);
+  if(!stream){stream=ns;}
+  else{const nv=ns.getVideoTracks()[0];
+    if(sender)await sender.replaceTrack(nv);
+    stream.getVideoTracks().forEach(t=>{if(t!==videoTrack)t.stop&&t.stop();});
+    stream.removeTrack(stream.getVideoTracks()[0]);stream.addTrack(nv);
+    ns.getAudioTracks().forEach(()=>{});
+    videoTrack=nv;applyMirror();return;}
+  videoTrack=stream.getVideoTracks()[0];applyMirror();
+}
+async function setTorch(on){
+  try{await videoTrack.applyConstraints({advanced:[{torch:!!on}]});torchOn=!!on;await evt({type:'torch',on:torchOn});}
+  catch{await evt({type:'error',msg:'Torcia non supportata su questa camera'});}
+}
+async function snap(upload){
+  try{const v=$('v');const c=document.createElement('canvas');c.width=v.videoWidth||1280;c.height=v.videoHeight||720;
+  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  const jpeg=c.toDataURL('image/jpeg',.92);
+  if(upload)await api('/api/shot',{method:'POST',body:JSON.stringify({jpeg})});
+  return jpeg;}catch(e){await evt({type:'error',msg:'Scatto fallito'});}
+}
+$('bTorch').onclick=()=>setTorch(!torchOn);
+$('bSnap').onclick=async()=>{await snap(true);st('📸 Foto inviata al PC');};
+$('bSwitch').onclick=async()=>{$('cam').value=$('cam').value==='environment'?'user':'environment';await restartVideo();};
+async function restartVideo(){
+  st('Cambio camera…');const[w,h]=$('qual').value.split('x').map(Number);
+  const ns=await navigator.mediaDevices.getUserMedia({video:{facingMode:$('cam').value,width:{ideal:w},height:{ideal:h},frameRate:{ideal:30}}});
+  const nv=ns.getVideoTracks()[0];
+  if(sender)await sender.replaceTrack(nv);
+  stream.getVideoTracks().forEach(t=>t.stop());stream.removeTrack(stream.getVideoTracks()[0]);stream.addTrack(nv);
+  videoTrack=nv;$('v').srcObject=stream;applyMirror();torchOn=false;
+}
+async function pollControl(){
+  while(running){try{
+    const r=await(await fetch('/api/control?n='+ctlN)).json();ctlN=r.n;
+    for(const c of r.cmds){
+      if(c.type==='torch')await setTorch(c.on);
+      else if(c.type==='switch'){$('cam').value=$('cam').value==='environment'?'user':'environment';await restartVideo();}
+      else if(c.type==='quality'&&c.w){$('qual').value=c.w+'x'+c.h;await restartVideo();}
+      else if(c.type==='snap'){await snap(true);await evt({type:'shot-done'});}
+      else if(c.type==='ping'){await evt({type:'pong',t:c.t});}
+    }}catch{}
+    await sleep(1200);}
+}
+async function connect(){
+  running=true;
+  pc=new RTCPeerConnection();
+  stream.getTracks().forEach(t=>{const s=pc.addTrack(t,stream);if(t.kind==='video')sender=s;});
+  pc.onicecandidate=e=>{if(e.candidate)api('/api/ice-phone',{method:'POST',body:JSON.stringify({c:e.candidate})});};
+  pc.onconnectionstatechange=async()=>{st('Stato: <b>'+pc.connectionState+'</b>');
+    if(pc.connectionState==='failed'){await reconnect();}};
+  const offer=await pc.createOffer();await pc.setLocalDescription(offer);
+  await api('/api/offer',{method:'POST',body:JSON.stringify({sdp:offer.sdp})});
+  st('Offerta inviata, attendo il PC… <span class="live">●</span>');
+  while(running){
+    try{const a=await(await fetch('/api/answer')).json();
+      if(a.sdp){await pc.setRemoteDescription({type:'answer',sdp:a.sdp});st('<span class="live">● LIVE</span> — puoi bloccare questa pagina in primo piano');break;}}catch{}
+    await sleep(1200);}
+  pollIce();pollControl();reportBattery();
+}
+async function pollIce(){while(running){try{const r=await(await fetch('/api/ice-pc?n='+iceN)).json();iceN=r.n;
+for(const c of r.cands){try{await pc.addIceCandidate(c);}catch{}}}catch{}await sleep(1200);}}
+async function reconnect(){try{pc&&pc.close();}catch{}iceN=0;if(stream)await connect();}
+async function reportBattery(){try{const b=await navigator.getBattery();const send=()=>evt({type:'battery',level:b.level,charging:b.charging});send();b.onlevelchange=send;}catch{}}
+$('go').onclick=async()=>{
+  $('go').disabled=true;
+  try{
+    await startStream();$('v').srcObject=stream;
+    try{await navigator.wakeLock?.request('screen');}catch{}
+    ['bTorch','bSwitch','bSnap'].forEach(id=>$(id).disabled=false);
+    $('qual').onchange=restartVideo;
+    await connect();
+    setInterval(()=>{$('v').play().catch(()=>{});},5000);
+  }catch(e){st('❌ Permesso negato o camera occupata. Ricarica e riprova.');$('go').disabled=false;}
+};
+applyMirror();
+</script></body></html>

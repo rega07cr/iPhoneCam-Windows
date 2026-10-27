@@ -1,0 +1,157 @@
+<!doctype html><html lang="it" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iPhoneCam per Windows</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root,[data-theme="dark"]{--bg:#0b1020;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--txt:#eef2ff;--mut:#9aa4c7;--acc:#7c6cff;--acc2:#22d3ee;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--in:#0a0f22}
+[data-theme="light"]{--bg:#eef1f8;--card:#ffffff;--line:#dbe1f0;--txt:#131a30;--mut:#5b6a8f;--in:#f2f5fb}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--txt);background:radial-gradient(1200px 600px at 80% -10%,#2b2a6b33 0%,transparent 60%),radial-gradient(900px 500px at 0% 10%,#0e3a5d44 0%,transparent 55%),var(--bg);min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 60px}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:24px;box-shadow:0 8px 30px rgba(124,108,255,.45)}
+h1{font-size:21px;margin:0}h1 small{display:block;color:var(--mut);font-weight:400;font-size:13px}.ver{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--mut)}
+.pill{margin-left:auto;font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--mut);display:flex;gap:8px;align-items:center}.pill b{color:var(--ok)}
+.iconbtn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:10px;padding:7px 10px;font-size:14px}
+.nav{display:flex;gap:8px;margin:6px 0 16px;flex-wrap:wrap}.nav button{flex:1;min-width:130px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:12px;padding:11px;font-size:14px;font-weight:600}.nav button.on{color:var(--txt);border-color:transparent;background:linear-gradient(135deg,rgba(124,108,255,.4),rgba(34,211,238,.28))}
+.grid{display:grid;grid-template-columns:350px 1fr;gap:16px}@media(max-width:920px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;backdrop-filter:blur(12px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.card h2{font-size:15px;margin:0 0 4px}.card p{color:var(--mut);font-size:13px;margin:6px 0 12px;line-height:1.55}
+#qr{background:#fff;border-radius:14px;padding:12px;display:grid;place-items:center;min-height:220px}#qr canvas,#qr img{max-width:100%}
+.urlbox{margin-top:12px;font-size:12px;background:var(--in);border:1px dashed var(--line);border-radius:10px;padding:10px;word-break:break-all;color:var(--mut)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+button.act{cursor:pointer;border:0;border-radius:12px;padding:10px 15px;font-weight:600;font-size:13.5px;color:#0b1020;background:linear-gradient(135deg,var(--acc2),#a5b4fc)}button.ghost{cursor:pointer;background:transparent;color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:10px 15px;font-size:13.5px}button.danger{cursor:pointer;background:transparent;color:var(--bad);border:1px solid var(--bad);border-radius:12px;padding:10px 15px;font-size:13.5px}button:disabled{opacity:.45;cursor:default}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 12px var(--warn);flex:none}.dot.ok{background:var(--ok);box-shadow:0 0 12px var(--ok)}
+.statusbar{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:13px;flex-wrap:wrap}
+.stage{position:relative;background:#000;border-radius:14px;border:1px solid var(--line);overflow:hidden}
+#preview{width:100%;aspect-ratio:16/9;background:#000;display:block}
+#preview.mirror{transform:scaleX(-1)}#preview.rot90{transform:rotate(90deg)}.stage.fit-contain #preview{object-fit:contain}.stage.fit-cover #preview{object-fit:cover}
+.statbar{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:10px}.statbar b{color:var(--txt);font-variant-numeric:tabular-nums}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.toolbar button{font-size:13px;padding:9px 12px}
+select,input{background:var(--in);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:13px}
+#log{height:120px;overflow:auto;background:var(--in);border:1px solid var(--line);border-radius:10px;padding:10px;font-family:Consolas,monospace;font-size:12px}
+#log div{color:var(--mut)}#log div:first-child{color:var(--txt)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.shot{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--in)}.shot img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}.shot div{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;font-size:11px;color:var(--mut)}.shot a{color:var(--acc2);text-decoration:none}.shot button{background:none;border:0;color:var(--bad);cursor:pointer;font-size:13px}
+.steps{display:flex;gap:8px;margin:12px 0}.step{flex:1;text-align:center;font-size:12px;color:var(--mut);padding:10px 6px;border-radius:12px;border:1px solid var(--line);background:var(--in)}.step.on{border-color:var(--ok);color:var(--txt)}
+.tabpage{display:none}.tabpage.on{display:block}
+.kbd{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;background:var(--in)}
+.rec{animation:blink 1s infinite}@keyframes blink{50%{opacity:.35}}
+.hidden{display:none!important}
+body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,body.popout #sideCol,body.popout .toolbar,body.popout .statbar,body.popout #logCard{display:none}body.popout .grid{grid-template-columns:1fr}body.popout #preview{aspect-ratio:auto;height:100vh}
+</style></head>
+<body><div class="wrap">
+<div class="top"><div class="logo">📷</div><h1>iPhoneCam <span class="ver" id="ver">v2</span><small>iPhone come webcam via USB o Wi-Fi · nessuna app da installare</small></h1>
+<div class="pill"><span class="dot" id="dot"></span><b id="pill">in attesa</b></div>
+<button class="iconbtn" id="theme" title="Tema chiaro/scuro">🌙</button></div>
+<div class="nav"><button data-t="prev" class="on">🎥 Anteprima</button><button data-t="foto">🖼️ Foto</button><button data-t="rete">🔌 Rete &amp; USB</button><button data-t="guida">❓ Guida</button></div>
+
+<div class="tabpage on" id="pg-prev"><div class="grid">
+<div class="card" id="sideCol"><h2>1 · Collega l'iPhone</h2><p>Inquadra il QR con la <b>Fotocamera</b> → apri in <b>Safari</b> → accetta il certificato una volta → <b>Consenti</b> fotocamera.</p>
+<div id="qr">…</div><div class="urlbox" id="urlBox">…</div>
+<div class="row"><button class="act" id="copy">Copia link</button><button class="ghost" id="dlqr">Scarica QR</button><button class="ghost" id="regen">Nuovo codice</button></div>
+<div class="steps"><div class="step" id="s1"><b>①</b>QR pronto</div><div class="step" id="s2"><b>②</b>iPhone</div><div class="step" id="s3"><b>③</b>Live</div></div></div>
+<div>
+<div class="card"><div class="statusbar"><span id="status">In attesa dell'iPhone…</span><span style="margin-left:auto" id="lat"></span></div>
+<div class="stage" id="stage"><video id="preview" autoplay playsinline muted></video></div>
+<div class="statbar"><span>Risoluzione <b id="stRes">—</b></span><span>FPS <b id="stFps">—</b></span><span>Bitrate <b id="stBr">—</b></span><span>Latenza <b id="stLat">—</b></span><span>Batteria iPhone <b id="stBat">—</b></span></div>
+<div class="toolbar">
+<button class="ghost" id="bSnap" disabled>📸 Scatta (PC)</button>
+<button class="ghost" id="bSnapR" disabled>📲 Scatta (iPhone)</button>
+<button class="ghost" id="bRec" disabled>⏺️ Registra</button>
+<button class="ghost" id="bMirror">🪞 Specchio</button>
+<button class="ghost" id="bFit">↔️ Adatta</button>
+<button class="ghost" id="bMute">🔊 Audio</button>
+<button class="ghost" id="bFull">⛶ Schermo intero</button>
+<button class="danger" id="bDisc">Disconnetti</button>
+</div>
+<div class="card" style="margin-top:16px"><h2>🎛️ Controlli remoti iPhone</h2><p>Comandi inviati all'iPhone in tempo reale.</p>
+<div class="row">
+<button class="ghost" id="cSwitch" disabled>🔄 Cambia camera</button>
+<button class="ghost" id="cTorch" disabled>🔦 Torcia: off</button>
+<select id="cQual" disabled><option value="1280x720">HD 720p</option><option value="1920x1080" selected>Full HD 1080p</option><option value="640x480">SD 480p (rete lenta)</option></select>
+<button class="ghost" id="cPing" disabled>📡 Test latenza</button>
+</div></div>
+<div class="card" style="margin-top:16px" id="logCard"><h2>Log</h2><div id="log"></div></div>
+</div></div></div>
+
+<div class="tabpage" id="pg-foto"><div class="card"><h2>🖼️ Foto scattate</h2><p>Salvate in <span class="kbd">snapshots/</span> accanto all'app. "Scatta (PC)" cattura il frame ricevuto, "Scatta (iPhone)" usa la massima qualità del telefono.</p>
+<div class="row"><button class="act" id="bRefresh">Aggiorna</button></div><br><div class="gal" id="gal"><p>Ancora nessuna foto.</p></div></div></div>
+
+<div class="tabpage" id="pg-rete"><div class="card"><h2>🔌 Rete &amp; USB</h2><p>Il PC e l'iPhone devono vedersi: stesso Wi-Fi <b>oppure</b> cavo USB con tethering.</p>
+<div class="urlbox" id="ips">…</div>
+<div class="row"><button class="ghost" id="bFw">🛡️ Istruzioni firewall</button><button class="ghost" id="bDiag">🩺 Diagnostica</button></div>
+<p><b>USB:</b> installa <i>Apple Devices</i> (Microsoft Store) o iTunes, collega il cavo, sull'iPhone approva "Autorizza", attiva <i>Hotspot personale → Solo USB</i>. Comparirà un IP <span class="kbd">172.20.10.x</span> e il QR lo userà da solo.<br><b>Wi-Fi:</b> 5 GHz consigliato, 1080p ≈ 4–8 Mbps.</p>
+<div class="card" style="margin-top:12px"><h2>🩺 Diagnostica</h2><div id="diag" style="font-size:13px;color:var(--mut)">Premi Diagnostica…</div></div>
+</div></div>
+
+<div class="tabpage" id="pg-guida"><div class="card"><h2>❓ Guida rapida</h2>
+<p><b>1.</b> Avvia l'app sul PC → <b>2.</b> QR con Fotocamera iPhone → <b>3.</b> "Apri in Safari" → <b>4.</b> accetta certificato (una volta sola) → <b>5.</b> Consenti fotocamera → LIVE. Tieni Safari in primo piano con schermo acceso.<br><br>
+<b>Zoom / Teams / Meet / Discord:</b> installa una volta <i>OBS Virtual Camera</i>, in OBS aggiungi sorgente <span class="kbd">Browser</span> con URL <span class="kbd" id="popUrl">…</span> (aggiungi <span class="kbd">?popout=1</span>), poi <span class="kbd">Avvia Virtual Camera</span> e selezionala come webcam. Il driver diretto è in roadmap.<br><br>
+<b>Non si collega?</b> Stesso Wi-Fi? Certificato accettato? Firewall: consenti Python sulla rete privata. Prova 720p o 480p.</p></div></div>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const SET=Object.assign({mirror:false,fit:'cover',theme:'dark'},JSON.parse(localStorage.getItem('icset')||'{}'));
+const save=()=>localStorage.setItem('icset',JSON.stringify(SET));
+const log=m=>{const d=document.createElement('div');d.textContent=new Date().toLocaleTimeString()+' · '+m;$('log').prepend(d);while($('log').children.length>60)$('log').lastChild.remove();};
+document.documentElement.dataset.theme=SET.theme;$('theme').textContent=SET.theme==='dark'?'🌙':'☀️';
+$('theme').onclick=()=>{SET.theme=SET.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=SET.theme;$('theme').textContent=SET.theme==='dark'?'🌙':'☀️';save();};
+// tabs
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.tabpage').forEach(p=>p.classList.remove('on'));$('pg-'+b.dataset.t).classList.add('on');if(b.dataset.t==='foto')loadShots();});
+// popout per OBS
+if(new URLSearchParams(location.search).get('popout')){document.body.classList.add('popout');document.querySelectorAll('.tabpage').forEach(p=>p.classList.remove('on'));$('pg-prev').classList.add('on');}
+let INFO=null,pc=null,connected=false,lastSdp='',iceN=0,evtN=0,rec=null,recChunks=[],torchOn=false,muted=true,fpsN=0,fpsT=performance.now();
+if(SET.mirror)$('preview').classList.add('mirror');
+async function api(p,o){const r=await fetch(p,Object.assign({headers:{'Content-Type':'application/json'}},o||{}));return r.json();}
+async function info(){try{INFO=await(await fetch('/api/info')).json();}catch{INFO={ips:['192.168.1.10'],port:4443,token:'DEMO',version:'demo',pcOnline:false};}
+$('ver').textContent='v'+(INFO.version||'?');renderQR();$('popUrl').textContent=`https://127.0.0.1:${INFO.port}/?popout=1`;$('ips').innerHTML='IP del PC:<br><b>'+INFO.ips.join('<br>')+'</b>';}
+function renderQR(){const u=`https://${INFO.ips[0]}:${INFO.port}/phone?t=${INFO.token}`;$('urlBox').textContent=u;
+try{$('qr').innerHTML='';new QRCode($('qr'),{text:u,width:200,height:200,correctLevel:1});}catch{$('qr').innerHTML='<p style=color:#333>'+u+'</p>';}
+$('s1').classList.add('on');}
+$('copy').onclick=async()=>{await navigator.clipboard.writeText($('urlBox').textContent);log('Link copiato');};
+$('dlqr').onclick=()=>{const c=$('qr').querySelector('canvas'),i=$('qr').querySelector('img');const a=document.createElement('a');a.download='iphone-cam-qr.png';a.href=c?c.toDataURL():(i?i.src:'#');a.click();};
+$('regen').onclick=async()=>{const r=await api('/api/regen',{method:'POST'});INFO.token=r.token;resetPeer();setStatus(false,'Nuovo codice: inquadra il QR');renderQR();log('Codice rigenerato');};
+function setStatus(ok,t){$('status').textContent=t;$('pill').textContent=ok?'LIVE':'in attesa';$('dot').className='dot'+(ok?' ok':'');['bSnap','bSnapR','bRec','cSwitch','cTorch','cQual','cPing'].forEach(id=>$(id).disabled=!ok);}
+function resetPeer(){try{pc&&pc.close();}catch{}pc=null;connected=false;lastSdp='';iceN=0;$('preview').srcObject=null;['s2','s3'].forEach(s=>$(s).classList.remove('on'));}
+setInterval(()=>api('/api/ping',{method:'POST',body:'{}'}).catch(()=>{}),5000);
+async function loop(){if(!INFO||connected)return;try{const o=await(await fetch('/api/offer')).json();
+if(o.sdp&&o.sdp!==lastSdp){lastSdp=o.sdp;$('s2').classList.add('on');log('Offerta iPhone, creo risposta…');
+pc=new RTCPeerConnection();iceN=0;
+pc.ontrack=e=>{$('preview').srcObject=e.streams[0];setStatus(true,'LIVE · iPhone collegato');$('s3').classList.add('on');connected=true;log('Video LIVE');countFps();pollIce();};
+pc.onicecandidate=e=>{if(e.candidate)api('/api/ice-pc',{method:'POST',body:JSON.stringify({c:e.candidate})});};
+pc.onconnectionstatechange=()=>{log('PC: '+pc.connectionState);if(['failed','disconnected','closed'].includes(pc.connectionState)){connected=false;resetPeer();setStatus(false,'Persa, in attesa…');}};
+await pc.setRemoteDescription({type:'offer',sdp:o.sdp});const ans=await pc.createAnswer();await pc.setLocalDescription(ans);
+await api('/api/answer',{method:'POST',body:JSON.stringify({sdp:ans.sdp})});}}catch(e){}}
+async function pollIce(){while(pc){try{const r=await(await fetch('/api/ice-phone?n='+iceN)).json();for(const c of r.cands){try{await pc.addIceCandidate(c);}catch{}}iceN=r.n;}catch{}await new Promise(r=>setTimeout(r,1200));if(!pc)break;}}
+setInterval(async()=>{if(!connected)return;try{const r=await(await fetch('/api/events?n='+evtN)).json();evtN=r.n;
+for(const e of r.evts){if(e.type==='pong'&&e.t){const ms=Date.now()-e.t;$('stLat').textContent=ms+' ms';$('lat').textContent='ping '+ms+' ms';log('Latenza: '+ms+' ms');}
+if(e.type==='torch'){$('cTorch').textContent='🔦 Torcia: '+(e.on?'on':'off');torchOn=!!e.on;}
+if(e.type==='shot-done'){log('Foto ricevuta dall\u2019iPhone');loadShots();}
+if(e.type==='battery'!=null&&e.level!=null){$('stBat').textContent=Math.round(e.level*100)+'%';}
+if(e.type==='error'){log('iPhone: '+(e.msg||'errore'));}}}catch{}},2000);
+setInterval(async()=>{if(!connected||!pc)return;try{const s=await pc.getStats();s.forEach(r=>{if(r.type==='inbound-rtp'&&r.kind==='video'){if(r.bytesReceived!=null){const b=r.bytesReceived;const dt=(Date.now()-(window._bt||Date.now()))/1000;const db=b-(window._bb||0);if(dt>0.5){$('stBr').textContent=(db*8/dt/1e6).toFixed(1)+' Mbps';window._bt=Date.now();window._bb=b;}}
+if(r.frameWidth)$('stRes').textContent=r.frameWidth+'×'+r.frameHeight;}});}catch{}},2000);
+function countFps(){const v=$('preview');const f=()=>{if(!connected)return;fpsN++;const n=performance.now();if(n-fpsT>=1000){$('stFps').textContent=fpsN;fpsN=0;fpsT=n;}if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(f);else setTimeout(f,100);};if(v.requestVideoFrameCallback)v.requestVideoFrameCallback(f);else setTimeout(f,100);}
+// toolbar
+$('bMirror').onclick=()=>{SET.mirror=!SET.mirror;$('preview').classList.toggle('mirror',SET.mirror);save();};
+$('bFit').onclick=()=>{const s=$('stage');const c=s.classList.contains('fit-cover');s.classList.toggle('fit-cover',!c);SET.fit=c?'contain':'cover';save();};
+if(SET.fit==='contain')$('stage').classList.remove('fit-cover');else $('stage').classList.add('fit-cover');
+$('stage').classList.add('fit-cover');
+$('bMute').onclick=()=>{muted=!muted;$('preview').muted=muted;$('bMute').textContent=muted?'🔊 Audio':'🔇 Audio';};
+$('bFull').onclick=()=>{document.fullscreenElement?document.exitFullscreen():$('stage').requestFullscreen?.();};
+$('bDisc').onclick=async()=>{await api('/api/clear',{method:'POST'});resetPeer();setStatus(false,'In attesa dell\u2019iPhone…');log('Disconnesso');};
+$('bSnap').onclick=async()=>{const v=$('preview');if(!v.videoWidth)return;const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');if(SET.mirror){x.translate(c.width,0);x.scale(-1,1);}x.drawImage(v,0,0);const r=await api('/api/shot',{method:'POST',body:JSON.stringify({jpeg:c.toDataURL('image/jpeg',.92)})});if(r.ok){log('Foto salvata: '+r.file);loadShots();}};
+$('bSnapR').onclick=async()=>{await api('/api/control',{method:'POST',body:JSON.stringify({type:'snap'})});log('Richiesto scatto all\u2019iPhone…');};
+$('bRec').onclick=()=>{if(rec){rec.stop();return;}const s=$('preview').srcObject;if(!s)return;recChunks=[];rec=new MediaRecorder(s,{mimeType:'video/webm'});rec.ondataavailable=e=>{if(e.data.size)recChunks.push(e.data);};rec.onstop=()=>{const b=new Blob(recChunks,{type:'video/webm'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='iphonecam-'+new Date().toISOString().replace(/[:.]/g,'-')+'.webm';a.click();$('bRec').textContent='⏺️ Registra';$('bRec').classList.remove('rec');rec=null;log('Registrazione salvata');};rec.start(1000);$('bRec').textContent='⏹️ Ferma';$('bRec').classList.add('rec');log('Registrazione avviata');};
+// controlli remoti
+$('cSwitch').onclick=()=>api('/api/control',{method:'POST',body:JSON.stringify({type:'switch'})});
+$('cTorch').onclick=()=>api('/api/control',{method:'POST',body:JSON.stringify({type:'torch',on:!torchOn})});
+$('cQual').onchange=e=>{const[w,h]=e.target.value.split('x').map(Number);api('/api/control',{method:'POST',body:JSON.stringify({type:'quality',w,h})});log('Qualità richiesta: '+e.target.value);};
+$('cPing').onclick=()=>api('/api/control',{method:'POST',body:JSON.stringify({type:'ping',t:Date.now()})});
+// foto
+async function loadShots(){try{const r=await(await fetch('/api/shots')).json();const g=$('gal');g.innerHTML=r.shots.length?'':'<p>Ancora nessuna foto.</p>';
+for(const f of r.shots){const d=document.createElement('div');d.className='shot';d.innerHTML=`<img loading="lazy" src="/shots/${f}"><div><span>${f}</span><span><a href="/shots/${f}" download>⬇</a> <button>✕</button></span></div>`;d.querySelector('button').onclick=async()=>{await fetch('/api/shots/'+f,{method:'DELETE'});loadShots();};g.appendChild(d);}}catch{}}
+$('bRefresh').onclick=loadShots;
+$('bFw').onclick=()=>alert('Se il QR non si apre:\n1. Prima connessione: Windows chiede "Consenti Python nella rete privata" → consenti.\n2. Altrimenti: Impostazioni → Firewall → Consenti app → python.exe → spunta Privata.\n3. Oppure esegui Apri-Firewall.bat come amministratore.');
+$('bDiag').onclick=async()=>{const r=await(await fetch('/api/info')).json();$('diag').innerHTML=`Versione server: <b>${r.version}</b><br>IP rilevati: <b>${r.ips.join(', ')}</b><br>Tethering USB attivo: <b>${r.ips.some(i=>i.startsWith('172.20.10.'))?'SÌ':'no'}</b><br>Dashboard raggiungibile: <b>sì</b> (stai leggendo questa pagina)<br>Offerta iPhone in attesa: <b>${(await(await fetch('/api/offer')).json()).sdp?'sì':'no'}</b>`;};
+info().then(()=>{setInterval(loop,1500);log('iPhoneCam pronto');});
+</script></body></html>
