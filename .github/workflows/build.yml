@@ -26,7 +26,7 @@ jobs:
 
       - name: Build EXE
         run: |
-          pyinstaller --noconfirm --clean --onefile --name iPhoneCam `
+          pyinstaller --noconfirm --clean --onefile --windowed --name iPhoneCam `
             --add-data "dashboard.html;." --add-data "phone.html;." `
             --collect-all pyvirtualcam `
             app.py

@@ -2,7 +2,7 @@
 title Build iPhoneCam EXE
 cd /d %~dp0
 py -m pip install -r requirements.txt
-py -m PyInstaller --noconfirm --clean --onefile --name iPhoneCam ^
+py -m PyInstaller --noconfirm --clean --onefile --windowed --name iPhoneCam ^
   --add-data "dashboard.html;." --add-data "phone.html;." ^
   --collect-all pyvirtualcam ^
   app.py

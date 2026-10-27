@@ -8,7 +8,11 @@
 Usa il tuo **iPhone come webcam del PC** via cavo **USB** o **Wi-Fi**.
 **Nessuna app da installare sull'iPhone**: inquadri il QR, si apre Safari, e sei live.
 
-## ✨ Funzionalità (v2)
+## ✨ Funzionalità (v2.3)
+
+- 🪟 **Zero console**: l'EXE non apre più finestre nere, tutto gira nella finestra iPhoneCam (log visibili nella dashboard)
+- ⚡ **Webcam virtuale a 30 fps** (720p consigliati, 1080p su USB, 480p per PC lenti) — selezionabile in Discord/Zoom/Teams/OBS
+- 🔌 **USB auto-rilevato**: colleghi il cavo e il QR passa da solo all'IP USB con qualità 1080p automatica
 
 - 🎥 **Streaming WebRTC** 480p / 720p / 1080p con anteprima live sul PC
 - 📱 **Zero installazione su iOS** — solo Safari + QR code

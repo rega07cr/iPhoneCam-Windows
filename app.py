@@ -22,7 +22,7 @@ import time
 import webbrowser
 from urllib.parse import urlparse, parse_qs
 
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 
 PORT_GUI = 8080  # dashboard HTTP solo-locale per la finestra integrata
 
@@ -38,6 +38,21 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = BASE_DIR  # cert/key/snapshots vivono accanto all'exe, non nel bundle
 SNAP_DIR = os.path.join(DATA_DIR, "snapshots")
 os.makedirs(SNAP_DIR, exist_ok=True)
+LOG_FILE = os.path.join(DATA_DIR, "iPhoneCam.log")
+
+
+def logmsg(msg):
+    # Log su file (l'EXE --windowed non ha console) + stdout quando c'e'.
+    line = f"[{time.strftime('%H:%M:%S')}] {msg}"
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+    except OSError:
+        pass
+    try:
+        print(line, flush=True)
+    except OSError:
+        pass
 
 PORT = 4443
 TOKEN = secrets.token_hex(4)
@@ -64,7 +79,7 @@ store = {
 vcam_lock = threading.Lock()
 vcam = {
     "active": False, "backend": None, "device": None,
-    "width": 1280, "height": 720, "fps": 20,
+    "width": 1280, "height": 720, "fps": 30,
     "cam": None, "frames": 0, "fps_actual": 0,
     "_n": 0, "_t": 0.0, "err": None, "session": 0,
     "detected": None, "detected_ts": 0.0,
@@ -84,7 +99,8 @@ def vcam_detect(force=False):
         return res
     for be in ("unitycapture", "obs"):
         try:
-            with pyvirtualcam.Camera(width=320, height=240, fps=15, backend=be) as c:
+            # Sonda con gli stessi parametri d'uso: alcuni backend rifiutano i formati bassi.
+            with pyvirtualcam.Camera(width=1280, height=720, fps=30, backend=be) as c:
                 res["backends"][be] = c.device
         except Exception:
             pass
@@ -97,7 +113,7 @@ def vcam_detect(force=False):
     return res
 
 
-def vcam_start(w=1280, h=720, fps=20, prefer=None):
+def vcam_start(w=1280, h=720, fps=30, prefer=None):
     with vcam_lock:
         vcam_stop_locked()
         try:
@@ -425,6 +441,9 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "token": TOKEN,
                     "phoneUrl": f"https://{ips[0]}:{PORT}/phone?t={TOKEN}",
                     "pcOnline": (time.time() - store["pc_seen"]) < 12,
+                    "usb": any(i.startswith("172.20.10.") for i in ips),
+                    "usbIp": next((i for i in ips if i.startswith("172.20.10.")), None),
+                    "transport": "usb" if any(i.startswith("172.20.10.") for i in ips) else "lan",
                 }
             )
         if u.path == "/api/offer":
@@ -444,7 +463,21 @@ class H(http.server.SimpleHTTPRequestHandler):
             n = int(q.get("n", ["0"])[0])
             return self._json({"evts": store["events"][n:], "n": len(store["events"])})
         if u.path == "/api/shots":
-            return self._json({"shots": store["shots"]})
+            total = 0
+            for f in store["shots"]:
+                try:
+                    total += os.path.getsize(os.path.join(SNAP_DIR, f))
+                except OSError:
+                    pass
+            return self._json({"shots": store["shots"], "bytes": total,
+                               "folder": os.path.abspath(SNAP_DIR)})
+        if u.path == "/api/logs":
+            try:
+                with open(LOG_FILE, encoding="utf-8") as f:
+                    lines = f.read().splitlines()[-80:]
+            except OSError:
+                lines = []
+            return self._json({"lines": lines})
         if u.path == "/api/vcam":
             return self._json(vcam_status())
         if u.path == "/api/qr":
@@ -499,7 +532,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             if act == "start":
                 w = int(data.get("w", 1280) or 1280)
                 h = int(data.get("h", 720) or 720)
-                fps = float(data.get("fps", 20) or 20)
+                fps = float(data.get("fps", 30) or 30)
                 r = vcam_start(w, h, min(max(fps, 5), 30), data.get("backend"))
                 r.update(vcam_status())
                 return self._json(r)
@@ -521,7 +554,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             store["ice_pc"] = []
             store["control"] = []
             store["events"] = []
-            print("[iPhoneCam] Offerta ricevuta da iPhone")
+            logmsg("Offerta ricevuta da iPhone")
             return self._json({"ok": True})
         if u.path == "/api/answer":
             store["answer"] = data.get("sdp")
@@ -561,7 +594,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 f.write(img)
             store["shots"].insert(0, fname)
             store["shots"] = store["shots"][:100]
-            print(f"[iPhoneCam] Foto salvata: {fname}")
+            logmsg(f"Foto salvata: {fname}")
             return self._json({"ok": True, "file": fname})
         if u.path == "/api/clear":
             store.update(
@@ -569,6 +602,12 @@ class H(http.server.SimpleHTTPRequestHandler):
                  "ice_pc": [], "control": [], "events": []}
             )
             return self._json({"ok": True})
+        if u.path == "/api/open-folder":
+            try:
+                os.startfile(os.path.abspath(SNAP_DIR))  # noqa: Windows
+                return self._json({"ok": True})
+            except Exception as e:
+                return self._json({"ok": False, "err": str(e)[:200]}, 500)
         return self.send_error(404)
 
     def do_DELETE(self):
@@ -595,10 +634,16 @@ class H(http.server.SimpleHTTPRequestHandler):
 
 
 def pause_exit(msg="Premi INVIO per chiudere..."):
-    # Per l'EXE: la finestra non deve sparire prima che l'utente legga l'errore.
+    # EXE --windowed: niente console -> popup Windows; .bat: attesa INVIO.
     try:
         input(f"\n[iPhoneCam] {msg}")
-    except (EOFError, KeyboardInterrupt):
+        return
+    except (EOFError, KeyboardInterrupt, OSError):
+        pass
+    try:
+        import ctypes
+        ctypes.windll.user32.MessageBoxW(None, msg, "iPhoneCam", 0x40)
+    except Exception:
         pass
 
 
@@ -640,6 +685,12 @@ def main():
         if f.lower().endswith((".jpg", ".jpeg")):
             store["shots"].append(f)
 
+    try:
+        if os.path.exists(LOG_FILE) and os.path.getsize(LOG_FILE) > 512 * 1024:
+            os.remove(LOG_FILE)
+    except OSError:
+        pass
+    logmsg(f"iPhoneCam v{__version__} avviato.")
     ips = lan_ips()
     cert, key = ensure_cert(ips)
 
@@ -651,21 +702,22 @@ def main():
             break
         except OSError:
             if p == args.port:
-                print(f"[iPhoneCam] Porta {p} occupata: un'altra istanza e' gia' in esecuzione?")
-                print("[iPhoneCam] Provo le porte successive...")
+                logmsg(f"Porta {p} occupata: un'altra istanza e' gia' in esecuzione?")
+                logmsg("Provo le porte successive...")
     if httpsd is None:
-        print(f"[iPhoneCam] ERRORE: porte {args.port}-{args.port + 9} tutte occupate.")
-        print("[iPhoneCam] Chiudi l'altra finestra iPhoneCam (Task Manager -> iPhoneCam.exe) e riprova.")
-        return pause_exit()
+        msg = (f"Porte {args.port}-{args.port + 9} tutte occupate. Chiudi l'altra finestra "
+               "iPhoneCam (Task Manager -> iPhoneCam.exe) e riprova.")
+        logmsg("ERRORE: " + msg)
+        return pause_exit(msg)
     if cert:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ctx.load_cert_chain(cert, key)
         httpsd.socket = ctx.wrap_socket(httpsd.socket, server_side=True)
     else:
-        print("[iPhoneCam] ATTENZIONE: HTTPS disabilitato, su iPhone la fotocamera NON funzionera'.")
+        logmsg("ATTENZIONE: HTTPS disabilitato, su iPhone la fotocamera NON funzionera'.")
     PORT = httpsd.server_address[1]
     if PORT != args.port:
-        print(f"[iPhoneCam] Uso la porta {PORT}. Inquadra il nuovo QR!")
+        logmsg(f"Uso la porta {PORT}. Inquadra il nuovo QR!")
 
     # 2) HTTP solo su localhost: dashboard senza avvisi di certificato.
     httpds = None
@@ -676,23 +728,24 @@ def main():
         except OSError:
             continue
     if httpds is None:
-        print("[iPhoneCam] ERRORE: nessuna porta locale libera (8080-8089).")
-        return pause_exit()
+        msg = "Nessuna porta locale libera (8080-8089)."
+        logmsg("ERRORE: " + msg)
+        return pause_exit(msg)
     PORT_GUI = httpds.server_address[1]
 
     threading.Thread(target=httpsd.serve_forever, daemon=True).start()
     threading.Thread(target=httpds.serve_forever, daemon=True).start()
 
     gui_url = f"http://127.0.0.1:{PORT_GUI}/"
-    print(f"[iPhoneCam v{__version__}] App: {gui_url}")
-    print(f"[iPhoneCam v{__version__}] iPhone (stesso Wi-Fi o USB): https://{ips[0]}:{PORT}/phone?t={TOKEN}")
-    print("[iPhoneCam] Sull'iPhone accetta l'avviso certificato UNA volta, poi Consenti fotocamera.")
+    logmsg(f"App: {gui_url}")
+    logmsg(f"iPhone (stesso Wi-Fi o USB): https://{ips[0]}:{PORT}/phone?t={TOKEN}")
+    logmsg("Sull'iPhone accetta l'avviso certificato UNA volta, poi Consenti fotocamera.")
 
     if args.no_browser:
         try:
             threading.Event().wait()
         except KeyboardInterrupt:
-            print("\n[iPhoneCam] Arresto.")
+            logmsg("Arresto.")
         return
     if not args.browser and open_gui(gui_url):
         return  # finestra chiusa -> i thread daemon terminano col processo
@@ -702,15 +755,16 @@ def main():
     try:
         threading.Event().wait()
     except KeyboardInterrupt:
-        print("\n[iPhoneCam] Arresto.")
+        logmsg("Arresto.")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n[iPhoneCam] Arresto.")
+        logmsg("Arresto.")
     except Exception as e:  # mai traceback nudo nella finestra dell'utente
-        print(f"\n[iPhoneCam] ERRORE: {e}")
-        print("[iPhoneCam] Se il problema persiste, apri un issue su GitHub con questo messaggio.")
-        pause_exit() 
+        msg = (f"ERRORE: {e}\nSe il problema persiste, apri un issue su GitHub "
+               "con questo messaggio.\nDettagli in iPhoneCam.log")
+        logmsg(msg)
+        pause_exit(msg)

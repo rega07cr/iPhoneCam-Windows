@@ -45,7 +45,9 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 
 <div class="tabpage on" id="pg-prev"><div class="grid">
 <div class="card" id="sideCol"><h2>1 · Collega l'iPhone</h2><p>Inquadra il QR con la <b>Fotocamera</b> → apri in <b>Safari</b> → accetta il certificato una volta → <b>Consenti</b> fotocamera.</p>
+<div class="statusbar" style="margin-top:0"><span class="dot" id="ndot"></span><span id="net">Rete…</span></div>
 <div id="qr"><img id="qrimg" src="/api/qr" alt="QR per collegare l'iPhone" style="max-width:100%;border-radius:8px"></div><div class="urlbox" id="urlBox">…</div>
+<div class="row"><label style="font-size:12px;color:var(--mut)">IP QR <select id="ipSel"></select></label></div>
 <div class="row"><button class="act" id="copy">Copia link</button><button class="ghost" id="dlqr">Scarica QR</button><button class="ghost" id="regen">Nuovo codice</button></div>
 <div class="steps"><div class="step" id="s1"><b>①</b>QR pronto</div><div class="step" id="s2"><b>②</b>iPhone</div><div class="step" id="s3"><b>③</b>Live</div></div></div>
 <div>
@@ -71,7 +73,7 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 </div></div>
 <div class="card" style="margin-top:16px" id="vcamCard"><h2>💻 Webcam virtuale (Discord · Zoom · Teams)</h2><p>Trasforma il LIVE in una <b>vera webcam di Windows</b>: poi la selezioni in qualsiasi app.</p>
 <div class="statusbar"><span class="dot" id="vdot"></span><span id="vstatus">Controllo driver…</span></div>
-<div class="row"><button class="act" id="vOn">▶ Attiva webcam virtuale</button><button class="ghost" id="vOff" disabled>⏹ Ferma</button><label style="font-size:13px;color:var(--mut)"><input type="checkbox" id="vAuto"> auto con LIVE</label></div>
+<div class="row"><button class="act" id="vOn">▶ Attiva webcam virtuale</button><button class="ghost" id="vOff" disabled>⏹ Ferma</button><select id="vQual" title="Risoluzione webcam virtuale"><option value="1280x720" selected>720p · 30fps (consigliato)</option><option value="1920x1080">1080p · 30fps (solo USB)</option><option value="854x480">480p · 30fps (PC lento)</option></select><label style="font-size:13px;color:var(--mut)"><input type="checkbox" id="vAuto"> auto con LIVE</label></div>
 <div class="statbar"><span>Dispositivo <b id="vDev">—</b></span><span>Invio <b id="vFps">—</b></span></div>
 <div id="vDriverBox" class="hidden"><p>⚠️ <b>Nessun driver trovato.</b><br>1) Doppio clic su <span class="kbd">Registra-Webcam-Virtuale.bat</span> nella cartella dell'app → consenti come amministratore.<br>2) Riavvia Discord/Zoom/Teams (devono rileggere le webcam).<br>Alternativa: installa <b>OBS Studio</b> (include la sua virtual camera).</p><div class="row"><button class="ghost" id="vRecheck">🔄 Ricontrolla driver</button></div></div>
 </div>
@@ -79,11 +81,13 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 </div></div></div>
 
 <div class="tabpage" id="pg-foto"><div class="card"><h2>🖼️ Foto scattate</h2><p>Salvate in <span class="kbd">snapshots/</span> accanto all'app. "Scatta (PC)" cattura il frame ricevuto, "Scatta (iPhone)" usa la massima qualità del telefono.</p>
-<div class="row"><button class="act" id="bRefresh">Aggiorna</button></div><br><div class="gal" id="gal"><p>Ancora nessuna foto.</p></div></div></div>
+<div class="row"><button class="act" id="bRefresh">Aggiorna</button><button class="ghost" id="bOpenFolder">📁 Apri cartella</button><span style="font-size:12px;color:var(--mut)" id="shotInfo"></span></div><br><div class="gal" id="gal"><p>Ancora nessuna foto.</p></div>
+<p style="margin-top:12px">💡 <b>Consigli:</b> “Scatta (PC)” è istantaneo e leggero; “Scatta (iPhone)” usa il sensore al massimo ma impiega qualche secondo. Le foto finiscono in <span class="kbd">snapshots/</span> accanto all'app e restano tue, in locale.</p></div></div>
 
 <div class="tabpage" id="pg-rete"><div class="card"><h2>🔌 Rete &amp; USB</h2><p>Il PC e l'iPhone devono vedersi: stesso Wi-Fi <b>oppure</b> cavo USB con tethering.</p>
 <div class="urlbox" id="ips">…</div>
-<div class="row"><button class="ghost" id="bFw">🛡️ Istruzioni firewall</button><button class="ghost" id="bDiag">🩺 Diagnostica</button></div>
+<div class="statusbar"><span class="dot" id="rdot"></span><span id="rnet">Rilevamento rete…</span></div>
+<div class="row"><button class="ghost" id="bFw">🛡️ Istruzioni firewall</button><button class="ghost" id="bDiag">🩺 Diagnostica</button><button class="ghost" id="bCopyDiag">📋 Copia report</button></div>
 <p><b>USB:</b> installa <i>Apple Devices</i> (Microsoft Store) o iTunes, collega il cavo, sull'iPhone approva "Autorizza", attiva <i>Hotspot personale → Solo USB</i>. Comparirà un IP <span class="kbd">172.20.10.x</span> e il QR lo userà da solo.<br><b>Wi-Fi:</b> 5 GHz consigliato, 1080p ≈ 4–8 Mbps.</p>
 <div class="card" style="margin-top:12px"><h2>🩺 Diagnostica</h2><div id="diag" style="font-size:13px;color:var(--mut)">Premi Diagnostica…</div></div>
 </div></div>
@@ -94,7 +98,7 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 <div class="card" style="margin-top:16px"><h2>💬 Usarla in Discord</h2>
 <p><b>Prima volta:</b> <b>1.</b> premi <b>▶ Attiva webcam virtuale</b> nella scheda Anteprima (installa il driver una volta con <span class="kbd">Registra-Webcam-Virtuale.bat</span> se richiesto). <b>2.</b> <b>Chiudi e riapri Discord</b> (rileva le webcam all'avvio). <b>3.</b> In Discord: <span class="kbd">⚙ Impostazioni → Voce e video → Videocamera</span> → scegli <b>Unity Video Capture</b> → <b>Prova video</b>. <b>4.</b> In chiamata premi l'icona <b>📹 Attiva videocamera</b>.<br>Stessi passi in <b>Zoom</b> (⚙ → Video → Fotocamera), <b>Teams</b> (… → Impostazioni → Dispositivi) e <b>Meet</b> su Chrome (⋮ → Impostazioni → Video).</p></div>
 <div class="card" style="margin-top:16px"><h2>🔌 USB vs Wi-Fi · Audio · OBS</h2>
-<p><b>USB (consigliato):</b> installa <i>Apple Devices</i> dal Microsoft Store (o iTunes), collega il cavo, sull'iPhone tocca <b>Autorizza</b> e attiva <span class="kbd">Hotspot personale → Solo USB</span>. Il QR userà da solo l'IP <span class="kbd">172.20.10.x</span>. Latenza tipica 60–90 ms.<br><b>Wi-Fi:</b> stesso Wi-Fi a 5 GHz per PC e iPhone, 720p se scatta (≈4–8 Mbps a 1080p).<br><b>Audio:</b> l'audio dell'iPhone arriva insieme al video (consenti il microfono). Per parlare usa microfono/auricolari del PC.<br><b>OBS:</b> aggiungi sorgente <span class="kbd">Browser</span> con URL <span class="kbd" id="popUrl">…</span> (schermo intero, 1280×720). Oppure seleziona direttamente <b>Unity Video Capture</b> come <i>Dispositivo di cattura video</i>: zero configurazione.</p></div>
+<p><b>USB (consigliato):</b> installa <i>Apple Devices</i> dal Microsoft Store (o iTunes), collega il cavo, sull'iPhone tocca <b>Autorizza</b> e attiva <span class="kbd">Hotspot personale → Solo USB</span>. Il QR userà da solo l'IP <span class="kbd">172.20.10.x</span>. Latenza tipica 60–90 ms.<br><b>Wi-Fi:</b> stesso Wi-Fi a 5 GHz per PC e iPhone, 720p se scatta (≈4–8 Mbps a 1080p).<br><b>Audio:</b> l'audio dell'iPhone arriva insieme al video (consenti il microfono). Per parlare usa microfono/auricolari del PC.<br><b>OBS:</b> seleziona direttamente <b>Unity Video Capture</b> come <i>Dispositivo di cattura video</i>: più fps e meno CPU della sorgente Browser. La sorgente <span class="kbd">Browser</span> con URL <span class="kbd" id="popUrl">…</span> resta disponibile ma è più lenta.</p></div>
 <div class="card" style="margin-top:16px"><h2>🛠️ Se qualcosa non va</h2>
 <p><b>QR non si apre:</b> PC e iPhone sulla stessa rete? Firewall: consenti Python sulla rete <i>privata</i> (<span class="kbd">Apri-Firewall.bat</span> come amministratore) o prova l'USB.<br><b>Pagina Safari nera / nessun permesso:</b> ricarica e tocca Consenti; serve <span class="kbd">https</span>, non http.<br><b>Discord non vede la camera:</b> driver registrato? Discord riavviato dopo l'installazione? Webcam virtuale <b>▶ Attiva</b> e iPhone LIVE?<br><b>Scatta / ritardi:</b> passa a 720p o 480p dai controlli remoti; avvicinati al router; chiudi app pesanti.<br><b>Si disconnette:</b> iOS sospende Safari in background — tienilo aperto e disattiva il blocco automatico durante le chiamate.</p></div>
 </div>
@@ -114,9 +118,20 @@ if(new URLSearchParams(location.search).get('popout')){document.body.classList.a
 let INFO=null,pc=null,connected=false,lastSdp='',iceN=0,evtN=0,rec=null,recChunks=[],torchOn=false,muted=true,fpsN=0,fpsT=performance.now();
 if(SET.mirror)$('preview').classList.add('mirror');
 async function api(p,o){const r=await fetch(p,Object.assign({headers:{'Content-Type':'application/json'}},o||{}));return r.json();}
-async function info(){try{INFO=await(await fetch('/api/info')).json();}catch{INFO={ips:['192.168.1.10'],port:4443,token:'DEMO',version:'demo',pcOnline:false};}
-$('ver').textContent='v'+(INFO.version||'?');renderQR();$('popUrl').textContent=`http://127.0.0.1:${INFO.guiPort||8080}/?popout=1`;$('ips').innerHTML='IP del PC:<br><b>'+INFO.ips.join('<br>')+'</b>';}
-function renderQR(){const u=`https://${INFO.ips[0]}:${INFO.port}/phone?t=${INFO.token}`;$('urlBox').textContent=u;
+let selIp=null,lastIps='';
+async function info(){try{INFO=await(await fetch('/api/info')).json();}catch{INFO={ips:['192.168.1.10'],port:4443,token:'DEMO',version:'demo',pcOnline:false,transport:'lan'};}
+$('ver').textContent='v'+(INFO.version||'?');
+if(!selIp||!INFO.ips.includes(selIp))selIp=INFO.ips[0];
+fillIpSel();renderQR();netBadge();
+$('popUrl').textContent=`http://127.0.0.1:${INFO.guiPort||8080}/?popout=1`;$('ips').innerHTML='IP del PC:<br><b>'+INFO.ips.join('<br>')+'</b>';}
+function fillIpSel(){const s=$('ipSel');const cur=s.value||selIp;s.innerHTML='';for(const ip of INFO.ips){const o=document.createElement('option');const usb=ip.startsWith('172.20.10.');o.value=ip;o.textContent=ip+(usb?' 🔌USB':'');s.appendChild(o);}s.value=INFO.ips.includes(cur)?cur:INFO.ips[0];selIp=s.value;}
+$('ipSel').onchange=e=>{selIp=e.target.value;renderQR();log('QR ora punta a '+selIp);};
+function netBadge(){const usb=INFO.transport==='usb'||INFO.usb;const t=usb?'🔌 USB collegato — massima qualità':'📶 Wi-Fi — consigliato 720p';$('net').textContent=t;$('ndot').className='dot'+(usb?' ok':'');$('rnet').textContent=t+' · IP: '+INFO.ips.join(', ');$('rdot').className='dot'+(usb?' ok':'');}
+setInterval(async()=>{try{const r=await(await fetch('/api/info')).json();const key=r.ips.join(',')+'|'+r.token;
+if(key!==lastIps){const hadUsb=INFO&&INFO.usb;INFO=r;if(!INFO.ips.includes(selIp))selIp=INFO.ips[0];fillIpSel();renderQR();netBadge();
+if(r.usb&&!hadUsb)log('🔌 USB rilevato: QR aggiornato, qualità massima disponibile.');
+lastIps=key;}}catch{}},5000);
+function renderQR(){const u=`https://${selIp||INFO.ips[0]}:${INFO.port}/phone?t=${INFO.token}`;$('urlBox').textContent=u;
 const qi=$('qrimg');if(qi){qi.src='/api/qr?ts='+Date.now();qi.onerror=()=>{$('qr').innerHTML='<p style=color:#333>QR non generato: apri sul telefono<br>'+u+'</p>';};}
 $('s1').classList.add('on');}
 $('copy').onclick=async()=>{await navigator.clipboard.writeText($('urlBox').textContent);log('Link copiato');};
@@ -128,7 +143,14 @@ setInterval(()=>api('/api/ping',{method:'POST',body:'{}'}).catch(()=>{}),5000);
 async function loop(){if(!INFO||connected)return;try{const o=await(await fetch('/api/offer')).json();
 if(o.sdp&&o.sdp!==lastSdp){lastSdp=o.sdp;$('s2').classList.add('on');log('Offerta iPhone, creo risposta…');
 pc=new RTCPeerConnection();iceN=0;
-pc.ontrack=e=>{$('preview').srcObject=e.streams[0];setStatus(true,'LIVE · iPhone collegato');$('s3').classList.add('on');connected=true;log('Video LIVE');countFps();pollIce();};
+pc.ontrack=e=>{$('preview').srcObject=e.streams[0];setStatus(true,'LIVE · iPhone collegato');$('s3').classList.add('on');connected=true;log('Video LIVE');countFps();pollIce();autoQuality();autoVcam();};
+let autoQ=false;
+function autoQuality(){if(autoQ)return;autoQ=true;const usb=INFO&&(INFO.transport==='usb'||INFO.usb);const q=usb?'1920x1080':'1280x720';
+try{$('cQual').value=q;}catch{}const[w,h]=q.split('x').map(Number);
+api('/api/control',{method:'POST',body:JSON.stringify({type:'quality',w,h})});
+log('Qualità auto ('+(usb?'USB':'Wi-Fi')+'): '+q);}
+let autoV=false;
+function autoVcam(){if(autoV||!$('vAuto').checked)return;autoV=true;$('vOn').click();}
 pc.onicecandidate=e=>{if(e.candidate)api('/api/ice-pc',{method:'POST',body:JSON.stringify({c:e.candidate})});};
 pc.onconnectionstatechange=()=>{log('PC: '+pc.connectionState);if(['failed','disconnected','closed'].includes(pc.connectionState)){connected=false;resetPeer();setStatus(false,'Persa, in attesa…');}};
 await pc.setRemoteDescription({type:'offer',sdp:o.sdp});const ans=await pc.createAnswer();await pc.setLocalDescription(ans);
@@ -160,12 +182,26 @@ $('cTorch').onclick=()=>api('/api/control',{method:'POST',body:JSON.stringify({t
 $('cQual').onchange=e=>{const[w,h]=e.target.value.split('x').map(Number);api('/api/control',{method:'POST',body:JSON.stringify({type:'quality',w,h})});log('Qualità richiesta: '+e.target.value);};
 $('cPing').onclick=()=>api('/api/control',{method:'POST',body:JSON.stringify({type:'ping',t:Date.now()})});
 // foto
-async function loadShots(){try{const r=await(await fetch('/api/shots')).json();const g=$('gal');g.innerHTML=r.shots.length?'':'<p>Ancora nessuna foto.</p>';
+async function loadShots(){try{const r=await(await fetch('/api/shots')).json();const g=$('gal');g.innerHTML=r.shots.length?'':'<p>Ancora nessuna foto. Premi 📸 nella scheda Anteprima: “Scatta (PC)” è istantaneo, “Scatta (iPhone)” usa la massima qualità.</p>';
+const mb=((r.bytes||0)/1048576).toFixed(1);$('shotInfo').textContent=r.shots.length?r.shots.length+' foto · '+mb+' MB · '+(r.folder||'snapshots/'):'';
 for(const f of r.shots){const d=document.createElement('div');d.className='shot';d.innerHTML=`<img loading="lazy" src="/shots/${f}"><div><span>${f}</span><span><a href="/shots/${f}" download>⬇</a> <button>✕</button></span></div>`;d.querySelector('button').onclick=async()=>{await fetch('/api/shots/'+f,{method:'DELETE'});loadShots();};g.appendChild(d);}}catch{}}
 $('bRefresh').onclick=loadShots;
+$('bOpenFolder').onclick=async()=>{const r=await api('/api/open-folder',{method:'POST'});if(!r.ok)alert('Non riesco ad aprire la cartella:\n'+(r.err||'?'));};
+// log del server (file iPhoneCam.log) dentro la dashboard: niente più console
+let logN=0;
+setInterval(async()=>{try{const r=await(await fetch('/api/logs')).json();const L=r.lines||[];
+if(L.length>logN){if(logN===0&&L.length>12)logN=L.length-12;
+for(let i=logN;i<L.length;i++){const d=document.createElement('div');d.textContent='[app] '+L[i];$('log').prepend(d);}
+logN=L.length;while($('log').children.length>80)$('log').lastChild.remove();}}catch{}},5000);
+// diagnostica automatica quando apri la scheda Rete
+async function runDiag(){const r=await(await fetch('/api/info')).json();const vc=await(await fetch('/api/vcam')).json().catch(()=>null);
+$('diag').innerHTML=`Versione server: <b>${r.version}</b><br>Collegamento: <b>${r.transport==='usb'?'🔌 USB (tethering '+r.usbIp+')':'📶 Wi-Fi/rete locale'}</b><br>IP rilevati: <b>${r.ips.join(', ')}</b><br>Dashboard: <b>ok</b> (stai leggendo questa pagina)<br>Offerta iPhone in attesa: <b>${(await(await fetch('/api/offer')).json()).sdp?'sì':'no'}</b><br>Driver webcam: <b>${vc?(vc.detected.ok?Object.values(vc.detected.backends).join(', '):'NON TROVATO — esegui Registra-Webcam-Virtuale.bat'):'?'}</b><br>Webcam virtuale attiva: <b>${vc&&vc.active?'SÌ ('+vc.frames_sent+' frame · '+vc.fps_actual+' fps)':'no'}</b><br>Foto salvate: <b>${(await(await fetch('/api/shots')).json()).shots.length}</b>`;window._diag=$('diag').innerText;}
+$('bCopyDiag').onclick=async()=>{await navigator.clipboard.writeText(window._diag||'diagnostica non eseguita');log('Report copiato: incollalo nella issue GitHub se serve aiuto');};
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.t==='rete')runDiag();}));
 $('bFw').onclick=()=>alert('Se il QR non si apre:\n1. Prima connessione: Windows chiede "Consenti Python nella rete privata" → consenti.\n2. Altrimenti: Impostazioni → Firewall → Consenti app → python.exe → spunta Privata.\n3. Oppure esegui Apri-Firewall.bat come amministratore.');
 // webcam virtuale: il browser invia frame JPEG via WebSocket, Python li gira al driver
 let ws=null,bridgeOn=false,bSent=0,bT=Date.now(),vOn=false;
+const VS={w:1280,h:720,fps:30};
 const vcanvas=document.createElement('canvas');vcanvas.width=1280;vcanvas.height=720;
 if(localStorage.getItem('vauto')==='1')$('vAuto').checked=true;
 $('vAuto').onchange=()=>localStorage.setItem('vauto',$('vAuto').checked?'1':'0');
@@ -177,10 +213,11 @@ async function vcamRefresh(){
  else{$('vdot').className='dot';$('vstatus').textContent=s.detected.ok?('Driver pronto: '+names.join(', ')+' — premi Attiva'):'Driver non trovato';$('vDev').textContent=names.join(', ')||'—';$('vFps').textContent='—';$('vOff').disabled=true;}
  if(s.err)log('VirtualCam: '+s.err);}catch{}}
 function vcamMsg(t){$('vFps').textContent=t;}
-$('vRecheck').onclick=async()=>{await fetch('/api/vcam');vcamRefresh();};
-$('vOn').onclick=async()=>{
+$('vRecheck').onclick=async()=>{await fetch('/api/vcam');vcamRefresh();}; $('vOn').onclick=async()=>{
  if(!connected){log('Collega prima l\u2019iPhone (LIVE), poi attiva la webcam virtuale.');alert('Collega prima l\u2019iPhone: inquadra il QR e attendi il LIVE.');return;}
- const r=await api('/api/vcam',{method:'POST',body:JSON.stringify({action:'start',w:1280,h:720,fps:20})});
+ const[w,h]=($('vQual').value||'1280x720').split('x').map(Number);
+ VS.w=w;VS.h=h;vcanvas.width=w;vcanvas.height=h;
+ const r=await api('/api/vcam',{method:'POST',body:JSON.stringify({action:'start',w,h,fps:30})});
  if(!r.ok){vcamRefresh();alert('Webcam virtuale non avviata:\n'+(r.err||'?'));return;}
  vOn=true;$('vOn').disabled=true;wsConnect();log('Webcam virtuale: '+r.device);vcamRefresh();
  if($('vAuto').checked)localStorage.setItem('vauto','1');};
@@ -193,16 +230,19 @@ function wsConnect(){
  ws.onclose=()=>{bridgeOn=false;if(vOn)setTimeout(()=>{if(vOn)wsConnect();},1500);};
  ws.onerror=()=>{};}
 function bridgeStop(){vOn=false;bridgeOn=false;try{if(ws)ws.close();}catch{}ws=null;$('vOn').disabled=false;}
+let lastSend=0;
 function pump(){
  if(!bridgeOn||!ws||ws.readyState!==1)return;
  const v=$('preview');
- if(!connected||!v.videoWidth){setTimeout(pump,600);return;}
+ if(!connected||!v.videoWidth){setTimeout(pump,400);return;}
+ const wait=34-(performance.now()-lastSend);
+ if(wait>0){setTimeout(pump,wait);return;}
  const x=vcanvas.getContext('2d');
- const vw=v.videoWidth,vh=v.videoHeight,ta=16/9,va=vw/vh;
+ const vw=v.videoWidth,vh=v.videoHeight,ta=VS.w/VS.h,va=vw/vh;
  let sw=vw,sh=vh,sx=0,sy=0;
  if(va>ta){sw=vh*ta;sx=(vw-sw)/2;}else{sh=vw/ta;sy=(vh-sh)/2;}
- x.drawImage(v,sx,sy,sw,sh,0,0,1280,720);
- vcanvas.toBlob(b=>{if(b&&bridgeOn&&ws&&ws.readyState===1){try{ws.send(b);bSent++;}catch{}}setTimeout(pump,40);},'image/jpeg',0.75);}
+ x.drawImage(v,sx,sy,sw,sh,0,0,VS.w,VS.h);
+ vcanvas.toBlob(b=>{lastSend=performance.now();if(b&&bridgeOn&&ws&&ws.readyState===1){try{if(ws.bufferedAmount<1048576){ws.send(b);bSent++;}}catch{}}pump();},'image/jpeg',0.7);}
 setInterval(()=>{if(bridgeOn)$('vFps').textContent=(bSent*1000/(Date.now()-bT)).toFixed(0)+' fps invio';bSent=0;bT=Date.now();},2000);
 const _resetPeer=resetPeer;
 resetPeer=function(){bridgeStop();_resetPeer();};

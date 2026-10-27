@@ -1,5 +1,6 @@
 cert.pem
 key.pem
+iPhoneCam.log
 snapshots/
 dist/
 build/
