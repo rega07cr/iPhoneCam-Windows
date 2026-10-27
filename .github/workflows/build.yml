@@ -49,4 +49,3 @@ jobs:
           files: |
             dist/iPhoneCam.exe
             iPhoneCam-portable.zip
-          generate_release_notes: true
