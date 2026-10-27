@@ -27,7 +27,9 @@ jobs:
       - name: Build EXE
         run: |
           pyinstaller --noconfirm --clean --onefile --windowed --name iPhoneCam `
+            --icon assets/icon.ico `
             --add-data "dashboard.html;." --add-data "phone.html;." `
+            --add-data "driver/UnityCapture;driver/UnityCapture" `
             --collect-all pyvirtualcam `
             app.py
 

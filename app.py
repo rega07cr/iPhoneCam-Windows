@@ -22,7 +22,7 @@ import time
 import webbrowser
 from urllib.parse import urlparse, parse_qs
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
 
 PORT_GUI = 8080  # dashboard HTTP solo-locale per la finestra integrata
 
@@ -38,6 +38,24 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = BASE_DIR  # cert/key/snapshots vivono accanto all'exe, non nel bundle
 SNAP_DIR = os.path.join(DATA_DIR, "snapshots")
 os.makedirs(SNAP_DIR, exist_ok=True)
+DRIVER_SRC = resource_path(os.path.join("driver", "UnityCapture"))
+DRIVER_DIR = os.path.join(DATA_DIR, "driver", "UnityCapture")
+
+
+def ensure_driver_files():
+    # In EXE --onefile i file dati vivono in _MEIPASS (sola lettura):
+    # regsvr32 vuole DLL reali su disco -> le copiamo accanto all'app.
+    try:
+        os.makedirs(DRIVER_DIR, exist_ok=True)
+        for f in ("UnityCaptureFilter32.dll", "UnityCaptureFilter64.dll",
+                  "Install.bat", "Uninstall.bat"):
+            src = os.path.join(DRIVER_SRC, f)
+            dst = os.path.join(DRIVER_DIR, f)
+            if os.path.exists(src) and not os.path.exists(dst):
+                import shutil
+                shutil.copyfile(src, dst)
+    except Exception as e:
+        logmsg(f"Driver: copia file fallita ({e})")
 LOG_FILE = os.path.join(DATA_DIR, "iPhoneCam.log")
 
 
@@ -84,6 +102,50 @@ vcam = {
     "_n": 0, "_t": 0.0, "err": None, "session": 0,
     "detected": None, "detected_ts": 0.0,
 }
+
+
+def vcam_register():
+    # Registra il filtro DirectShow UnityCapture (serve prompt UAC admin).
+    # Ritorna {ok} oppure {ok:False, needAdmin} se serve l'installazione manuale.
+    ensure_driver_files()
+    import platform
+    dll64 = os.path.join(DRIVER_DIR, "UnityCaptureFilter64.dll")
+    dll32 = os.path.join(DRIVER_DIR, "UnityCaptureFilter32.dll")
+    if not os.path.exists(dll64) and not os.path.exists(dll32):
+        return {"ok": False, "needAdmin": False,
+                "err": "File driver non trovati (driver/UnityCapture mancante)."}
+    import subprocess
+    for dll in (dll64, dll32):
+        if not os.path.exists(dll):
+            continue
+        try:
+            r = subprocess.run(["regsvr32", "/s", dll],
+                               capture_output=True, timeout=60)
+            if r.returncode != 0:
+                raise OSError(f"regsvr32 codice {r.returncode}")
+        except Exception:
+            # Riprova con prompt UAC (finestra di Windows, niente console).
+            try:
+                ps = ('Start-Process regsvr32 -ArgumentList \'/s "' + dll +
+                      '"\' -Verb RunAs -Wait')
+                r = subprocess.run(["powershell", "-NoProfile", "-Command", ps],
+                                   capture_output=True, timeout=120)
+                if r.returncode != 0:
+                    return {"ok": False, "needAdmin": True,
+                            "err": "Serve conferma amministratore: esegui "
+                                     "Registra-Webcam-Virtuale.bat come amministratore."}
+            except Exception as e:
+                return {"ok": False, "needAdmin": True,
+                        "err": f"Registrazione fallita: {str(e)[:180]}"}
+    vcam["detected"] = None
+    det = vcam_detect(force=True)
+    if det["ok"]:
+        logmsg("Driver webcam virtuale registrato: " +
+               ", ".join(det["backends"].values()))
+        return {"ok": True, "backends": det["backends"]}
+    return {"ok": False, "needAdmin": True,
+            "err": det.get("err") or "Driver non rilevato dopo la registrazione. "
+                   "Riavvia le app (Discord/Zoom) e ricontrolla."}
 
 
 def vcam_detect(force=False):
@@ -540,6 +602,8 @@ class H(http.server.SimpleHTTPRequestHandler):
                 vcam_stop()
                 return self._json(vcam_status())
             return self._json({"ok": False, "err": "action: start|stop"}, 400)
+        if u.path == "/api/vcam/register":
+            return self._json(vcam_register())
         if u.path == "/api/regen":
             TOKEN = secrets.token_hex(4)
             store.update(
@@ -691,6 +755,7 @@ def main():
     except OSError:
         pass
     logmsg(f"iPhoneCam v{__version__} avviato.")
+    ensure_driver_files()
     ips = lan_ips()
     cert, key = ensure_cert(ips)
 

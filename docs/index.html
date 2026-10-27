@@ -2,46 +2,55 @@
 <title>iPhoneCam — Usa l'iPhone come webcam Windows</title>
 <meta name="description" content="iPhoneCam: usa l'iPhone come webcam del PC via USB o Wi-Fi. Nessuna app da installare su iOS, solo Safari + QR. Gratis e open source.">
 <style>
-:root{--bg:#0b1020;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--txt:#eef2ff;--mut:#9aa4c7;--acc:#7c6cff;--acc2:#22d3ee;--ok:#34d399}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--txt);background:radial-gradient(1100px 550px at 85% -5%,#2b2a6b55 0%,transparent 60%),radial-gradient(800px 450px at 5% 8%,#0e3a5d66 0%,transparent 55%),var(--bg)}
-.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
-header{position:sticky;top:0;backdrop-filter:blur(14px);background:rgba(11,16,32,.75);border-bottom:1px solid var(--line);z-index:10}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:#f5efff;background:linear-gradient(180deg,#0d0a24 0%,#1b1440 40%,#3b1d5a 70%,#6b2d6e 100%);min-height:100vh;overflow-x:hidden}
+.moon{position:fixed;top:60px;right:8%;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7ed,#fbcfe8 60%,#f0abfc);box-shadow:0 0 90px 24px rgba(251,207,232,.35);z-index:0}
+.mountains{position:fixed;left:0;right:0;bottom:0;height:300px;z-index:0;pointer-events:none;opacity:.9}
+.petal{position:fixed;top:-20px;z-index:1;pointer-events:none;border-radius:80% 0 80% 0;background:linear-gradient(135deg,#fda4af,#f0abfc);opacity:.8;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(340deg);opacity:.15}}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px;position:relative;z-index:2}
+header{position:sticky;top:0;backdrop-filter:blur(14px);background:rgba(13,10,36,.8);border-bottom:1px solid rgba(255,150,200,.22);z-index:10}
 header .wrap{display:flex;align-items:center;gap:12px;padding:12px 20px}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:20px}
-nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}nav a{color:var(--mut);text-decoration:none;font-size:13.5px;padding:8px 12px;border-radius:10px}nav a:hover{color:var(--txt);background:var(--card)}
-.btn{display:inline-block;border:0;cursor:pointer;border-radius:12px;padding:13px 24px;font-weight:700;font-size:15px;color:#0b1020;background:linear-gradient(135deg,var(--acc2),#a5b4fc);text-decoration:none;box-shadow:0 8px 28px rgba(34,211,238,.35)}
-.btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line);box-shadow:none}
-.hero{text-align:center;padding:72px 0 40px}
-.hero h1{font-size:clamp(32px,5vw,54px);margin:14px 0 10px;line-height:1.1}
-.hero h1 span{background:linear-gradient(135deg,var(--acc2),#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{color:var(--mut);font-size:17px;max-width:640px;margin:0 auto 26px;line-height:1.6}
-.ver{display:inline-block;font-size:12.5px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:6px}
+nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}nav a{color:#b9a8d9;text-decoration:none;font-size:13.5px;padding:8px 12px;border-radius:10px}nav a:hover{color:#fff;background:#ffffff14}
+.btn{display:inline-block;border:0;cursor:pointer;border-radius:14px;padding:15px 30px;font-weight:800;font-size:16px;color:#2b0a1e;background:linear-gradient(135deg,#ff7ab8,#c4b5fd);text-decoration:none;box-shadow:0 10px 34px rgba(255,122,184,.45);transition:.2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(255,122,184,.6)}
+.btn.ghost{background:transparent;color:#f5efff;border:1px solid rgba(255,150,200,.4);box-shadow:none}
+.hero{text-align:center;padding:90px 0 50px}
+.hero .phone{filter:drop-shadow(0 10px 40px rgba(255,122,184,.6));animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+.hero h1{font-size:clamp(32px,5vw,56px);margin:18px 0 10px;line-height:1.1}
+.hero h1 span{background:linear-gradient(135deg,#ff7ab8,#c4b5fd,#5eead4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:#cbb8ee;font-size:17px;max-width:640px;margin:0 auto 26px;line-height:1.6}
+.ver{display:inline-block;font-size:12.5px;color:#ffc7e3;border:1px solid rgba(255,150,200,.4);border-radius:999px;padding:5px 14px;margin-bottom:6px;background:#ffffff0d}
 .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.note{font-size:12.5px;color:var(--mut);margin-top:14px}
+.note{font-size:12.5px;color:#b9a8d9;margin-top:14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:26px 0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
-.card h3{margin:0 0 6px;font-size:15.5px}.card p{margin:0;color:var(--mut);font-size:13.5px;line-height:1.55}
-h2{font-size:24px;margin:46px 0 6px}.sub{color:var(--mut);font-size:14px;margin:0 0 16px}
+.card{background:rgba(20,16,48,.8);border:1px solid rgba(255,150,200,.22);border-radius:16px;padding:18px;backdrop-filter:blur(12px)}
+.card h3{margin:0 0 6px;font-size:15.5px}.card p{margin:0;color:#b9a8d9;font-size:13.5px;line-height:1.55}
+h2{font-size:24px;margin:46px 0 6px}.sub{color:#b9a8d9;font-size:14px;margin:0 0 16px}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
-.step .n{font-size:30px}.step b{display:block;margin:8px 0 6px}.step p{color:var(--mut);font-size:13.5px;margin:0;line-height:1.55}
-table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}.th,.td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
-code,.kbd{font-size:12.5px;border:1px solid var(--line);border-radius:7px;padding:2px 8px;background:rgba(0,0,0,.35);font-family:Consolas,monospace}
-.dl{background:linear-gradient(135deg,rgba(124,108,255,.18),rgba(34,211,238,.12));border:1px solid var(--line);border-radius:20px;padding:34px;text-align:center;margin:40px 0}
-.dl h2{margin:0 0 8px}.dl p{color:var(--mut);font-size:14px}
-details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:8px 0;font-size:14px}summary{cursor:pointer;font-weight:600}details p{color:var(--mut);line-height:1.6}
-footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--mut);font-size:13px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}footer a{color:var(--acc2)}
-.req{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--mut)}
+.step{background:rgba(20,16,48,.8);border:1px solid rgba(255,150,200,.22);border-radius:16px;padding:20px;text-align:center}
+.step .n{font-size:30px}.step b{display:block;margin:8px 0 6px}.step p{color:#b9a8d9;font-size:13.5px;margin:0;line-height:1.55}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}.th,.td{text-align:left;padding:11px 12px;border-bottom:1px solid rgba(255,150,200,.2)}th{color:#b9a8d9;font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+code{font-size:12.5px;border:1px solid rgba(255,150,200,.3);border-radius:7px;padding:2px 8px;background:rgba(0,0,0,.4);font-family:Consolas,monospace}
+.dl{background:linear-gradient(135deg,rgba(255,122,184,.22),rgba(139,123,255,.18));border:1px solid rgba(255,150,200,.4);border-radius:20px;padding:38px;text-align:center;margin:40px 0;box-shadow:0 20px 60px rgba(255,122,184,.2)}
+.dl h2{margin:0 0 8px}.dl p{color:#cbb8ee;font-size:14px}
+details{background:rgba(20,16,48,.8);border:1px solid rgba(255,150,200,.22);border-radius:12px;padding:14px 16px;margin:8px 0;font-size:14px}summary{cursor:pointer;font-weight:600}details p{color:#b9a8d9;line-height:1.6}
+footer{border-top:1px solid rgba(255,150,200,.22);padding:26px 0 90px;color:#b9a8d9;font-size:13px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}footer a{color:#5eead4}
+.req{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:#b9a8d9}
 </style></head>
 <body>
-<header><div class="wrap"><div class="logo">📷</div><b>iPhoneCam</b>
-<nav><a href="#funzioni">Funzioni</a><a href="#come">Come funziona</a><a href="#virtual">Zoom &amp; Teams</a><a href="#faq">FAQ</a><a href="#download">Download</a></nav></div></header>
+<div class="moon"></div>
+<svg class="mountains" viewBox="0 0 1440 300" preserveAspectRatio="none"><path d="M0 300V180L180 60 340 160 520 40 700 170 880 70 1060 180 1240 90 1440 190V300Z" fill="#241b4d" opacity=".85"/><path d="M0 300V230L220 140 420 210 640 130 860 220 1080 150 1300 220 1440 180V300Z" fill="#160f38"/><g fill="#ff7ab8" opacity=".85"><circle cx="150" cy="222" r="30"/><circle cx="190" cy="210" r="22"/><circle cx="112" cy="210" r="18"/><circle cx="1290" cy="208" r="32"/><circle cx="1330" cy="195" r="22"/><circle cx="1250" cy="195" r="18"/></g><g fill="#3a2a1a"><rect x="146" y="232" width="9" height="34" rx="3"/><rect x="1286" y="220" width="9" height="36" rx="3"/></g></svg>
+<header><div class="wrap"><svg width="34" height="34" viewBox="0 0 96 96"><rect x="26" y="6" width="44" height="84" rx="12" fill="#1b1440" stroke="#ff7ab8" stroke-width="5"/><circle cx="48" cy="44" r="14" fill="#0b1020" stroke="#a5b4fc" stroke-width="4"/><circle cx="48" cy="44" r="6" fill="#22d3ee"/></svg><b>iPhoneCam</b>
+<nav><a href="#funzioni">Funzioni</a><a href="#come">Come funziona</a><a href="#virtual">Discord &amp; co.</a><a href="#faq">FAQ</a><a href="#download">Download</a></nav></div></header>
 <div class="wrap">
 
 <div class="hero">
+<svg class="phone" width="110" height="110" viewBox="0 0 96 96"><rect x="26" y="6" width="44" height="84" rx="12" fill="#1b1440" stroke="#ff7ab8" stroke-width="3"/><rect x="32" y="14" width="32" height="60" rx="6" fill="#2b2360"/><circle cx="48" cy="44" r="14" fill="#0b1020" stroke="#a5b4fc" stroke-width="3"/><circle cx="48" cy="44" r="7" fill="#22d3ee"/><circle cx="48" cy="44" r="3" fill="#fff"/><rect x="42" y="80" width="12" height="4" rx="2" fill="#ff7ab8"/></svg>
 <div class="ver" id="ver">ultima versione: …</div>
 <h1>L'iPhone diventa la <span>webcam del PC</span></h1>
-<p>Via cavo USB o Wi-Fi, <b>senza installare alcuna app sull'iPhone</b>: inquadri il QR, si apre Safari, e sei live in Zoom, Teams, Meet, Discord e OBS.</p>
+<p>Via cavo USB o Wi-Fi, <b>senza installare alcuna app sull'iPhone</b>: inquadri il QR, si apre Safari, e sei live in Discord, Zoom, Teams, Meet e OBS. Condivisione schermo, modalità Eco e animazioni sakura 🌸</p>
 <div class="cta"><a class="btn" id="dlMain" href="https://github.com/rega07cr/iPhoneCam-Windows/releases/latest">⬇ Scarica per Windows</a><a class="btn ghost" href="https://github.com/rega07cr/iPhoneCam-Windows">⭐ Codice su GitHub</a></div>
 <div class="req"><span>🪟 Windows 10/11</span><span>📱 iPhone con Safari</span><span>💰 Gratis · open source (MIT)</span></div>
 <p class="note" id="dlNote">Download diretto dell'eseguibile dall'ultima release.</p>
@@ -50,30 +59,29 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--mut);fon
 <h2 id="funzioni">✨ Funzioni</h2><p class="sub">Tutto quello che ti serve, niente di superfluo.</p>
 <div class="grid">
 <div class="card"><h3>🎥 Streaming HD</h3><p>WebRTC fino a 1080p, con 480p/720p per le reti lente. Anteprima live sul PC.</p></div>
-<div class="card"><h3>🪟 Zero console</h3><p>Nessuna finestra nera: tutto gira nella finestra iPhoneCam, con log integrati e QR generato offline.</p></div>
-<div class="card"><h3>⚡ 30 fps reali</h3><p>Webcam virtuale fino a 30 fps, USB rilevato in automatico con qualità massima. Perfetta per Discord e le call.</p></div>
-<div class="card"><h3>📱 Zero app su iOS</h3><p>Solo Safari + QR code. Niente App Store, niente account, niente cavi strani.</p></div>
-<div class="card"><h3>🔌 USB o Wi-Fi</h3><p>Tethering USB rilevato in automatico per la latenza minima, oppure stesso Wi-Fi.</p></div>
+<div class="card"><h3>💬 Vera webcam, senza OBS</h3><p>Un clic in Anteprima e l'iPhone diventa una webcam di Windows: selezionabile in Discord, Zoom, Teams, Meet.</p></div>
+<div class="card"><h3>🔌 USB plug-and-play</h3><p>Colleghi il cavo e il QR passa da solo all'IP USB, con qualità 1080p automatica.</p></div>
+<div class="card"><h3>🖥️ Screen share</h3><p>Mostra lo schermo dell'iPhone in call: si attiva dal PC o dal telefono, quando vuoi.</p></div>
+<div class="card"><h3>🌱 Modalità Eco</h3><p>540p/15fps per dimezzare la CPU sui PC datati. Standard e Max per gli altri.</p></div>
+<div class="card"><h3>📱 Zero app su iOS</h3><p>Solo Safari + QR code. Niente App Store, niente account.</p></div>
 <div class="card"><h3>🎛️ Controlli remoti</h3><p>Torcia, cambio camera, qualità e test latenza comandati dal PC in tempo reale.</p></div>
 <div class="card"><h3>📸 Foto e ⏺️ video</h3><p>Scatti dal PC o in alta qualità dall'iPhone, galleria integrata, registrazione WebM.</p></div>
 <div class="card"><h3>📊 Sempre sotto controllo</h3><p>Risoluzione, FPS, bitrate, latenza e batteria iPhone in diretta.</p></div>
-<div class="card"><h3>💬 Vera webcam per Discord</h3><p>Un clic in Anteprima e l'iPhone diventa una webcam di Windows: selezionabile in Discord, Zoom, Teams, Meet e OBS.</p></div>
-<div class="card"><h3>🖥️ Pronto per OBS</h3><p>Modalità popout per la sorgente Browser + guida Virtual Camera in 2 minuti.</p></div>
 <div class="card"><h3>🔒 Privato</h3><p>Tutto resta in rete locale: nessun cloud, nessun account, codice open source.</p></div>
 </div>
 
 <h2 id="come">🚀 Come funziona</h2><p class="sub">Dal download al live in meno di 2 minuti.</p>
 <div class="steps">
-<div class="step"><div class="n">①</div><b>Avvia sul PC</b><p>Scarica, scompatta, doppio clic su <code>Avvia-iPhoneCam.bat</code>. Si apre la finestra iPhoneCam con il QR generato offline.</p></div>
+<div class="step"><div class="n">①</div><b>Avvia sul PC</b><p>Scarica ed esegui <code>iPhoneCam.exe</code>. Si apre la finestra iPhoneCam con animazione e QR generato offline.</p></div>
 <div class="step"><div class="n">②</div><b>Inquadra con l'iPhone</b><p>Fotocamera nativa → apri il link in <b>Safari</b> → accetta il certificato una volta → Consenti fotocamera.</p></div>
 <div class="step"><div class="n">③</div><b>Sei LIVE</b><p>Anteprima sul PC, controlli remoti, foto e registrazione. Tieni Safari in primo piano.</p></div>
 </div>
 
-<h2 id="virtual">🎙️ Usarla in Zoom, Teams, Meet, Discord</h2><p class="sub">Il driver virtuale diretto è in roadmap; intanto il ponte OBS richiede 2 minuti, una volta sola.</p>
+<h2 id="virtual">💬 Usarla in Discord, Zoom, Teams, Meet</h2><p class="sub">Niente OBS: il driver è integrato.</p>
 <div class="steps">
-<div class="step"><div class="n">📦</div><b>Installa OBS Studio</b><p>Gratis da obsproject.com. La Virtual Camera è integrata dalla versione 28.</p></div>
-<div class="step"><div class="n">🌐</div><b>Sorgente Browser</b><p>URL <code>http://127.0.0.1:8080/?popout=1</code> (porta esatta nella dashboard), poi in OBS <b>Avvia Virtual Camera</b>.</p></div>
-<div class="step"><div class="n">✅</div><b>Selezionala ovunque</b><p>In Zoom/Teams/Meet/Discord scegli <b>OBS Virtual Camera</b> come webcam.</p></div>
+<div class="step"><div class="n">🛠️</div><b>Installa il driver</b><p>Una volta sola: in Anteprima premi <b>🛠️ Installa driver</b> e conferma l'amministratore.</p></div>
+<div class="step"><div class="n">▶</div><b>Attiva la webcam</b><p>Collega l'iPhone fino al LIVE, poi premi <b>▶ Attiva webcam virtuale</b>.</p></div>
+<div class="step"><div class="n">✅</div><b>Selezionala ovunque</b><p>Riavvia Discord/Zoom/Teams e scegli <b>Unity Video Capture</b> come videocamera.</p></div>
 </div>
 
 <h2 id="download">⬇ Download</h2><p class="sub">Scegli il formato che preferisci. Sempre gratis, sempre open source.</p>
@@ -86,16 +94,18 @@ footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--mut);fon
 
 <h2 id="faq">❓ Domande frequenti</h2>
 <details><summary>Devo installare qualcosa sull'iPhone?</summary><p>No. Solo Safari: inquadri il QR con la Fotocamera, apri il link, consenti l'accesso alla fotocamera. Fine.</p></details>
-<details><summary>Perché devo accettare un certificato?</summary><p>iOS permette l'accesso alla fotocamera solo su connessioni sicure (HTTPS). L'app genera un certificato in locale, sulla tua rete: lo accetti una volta sola, resta tutto in casa tua.</p></details>
-<details><summary>USB o Wi-Fi?</summary><p>Entrambi. L'USB (tethering con Apple Devices/iTunes) ha meno latenza; il Wi-Fi a 5 GHz va benissimo. L'app rileva da sola l'IP giusto.</p></details>
-<details><summary>Funziona con Zoom / Teams / Meet?</summary><p>Sì, tramite OBS Virtual Camera (guida sopra). Il driver virtuale integrato è in arrivo.</p></details>
+<details><summary>Perché devo accettare un certificato?</summary><p>iOS permette l'accesso alla fotocamera solo su connessioni sicure (HTTPS). L'app genera un certificato in locale, sulla tua rete: lo accetti una volta sola.</p></details>
+<details><summary>USB o Wi-Fi?</summary><p>Entrambi. Collega il cavo (con Apple Devices/iTunes) e l'app passa da sola all'USB; altrimenti usa lo stesso Wi-Fi a 5 GHz.</p></details>
+<details><summary>Funziona con Discord / Zoom / Teams?</summary><p>Sì: attiva la webcam virtuale in Anteprima e scegli <b>Unity Video Capture</b> nelle impostazioni video dell'app. Niente OBS.</p></details>
+<details><summary>Posso condividere lo schermo dell'iPhone?</summary><p>Sì: premi 🖥️ nella pagina Safari o il pulsante “Schermo iPhone” sul PC. La webcam virtuale trasmette lo schermo finché è attivo.</p></details>
+<details><summary>Il PC è lento / le ventole girano forte?</summary><p>Seleziona 🌱 Eco nella scheda Anteprima e usa 720p invece di 1080p in Wi-Fi.</p></details>
 <details><summary>È gratis? I miei video vanno online?</summary><p>Gratis e MIT open source. Il video viaggia solo nella tua rete locale, nessun server esterno.</p></details>
-<details><summary>Non si collega, che faccio?</summary><p>Stesso Wi-Fi su PC e iPhone? Certificato accettato? Firewall: consenti Python sulla rete privata (c'è <code>Apri-Firewall.bat</code>). Prova 720p o 480p dai controlli remoti.</p></details>
+<details><summary>Non si collega, che faccio?</summary><p>Stesso Wi-Fi su PC e iPhone? Certificato accettato? Firewall: consenti Python sulla rete privata. Prova 720p o 480p dai controlli remoti.</p></details>
 
-<footer><span>📷 <b>iPhoneCam</b> · MIT open source</span><span style="margin-left:auto"><a href="https://github.com/rega07cr/iPhoneCam-Windows">GitHub</a> · <a href="https://github.com/rega07cr/iPhoneCam-Windows/issues">Segnala un problema</a> · <a href="https://github.com/rega07cr/iPhoneCam-Windows/releases">Release</a></span></footer>
+<footer><span>🌸 <b>iPhoneCam</b> · MIT open source</span><span style="margin-left:auto"><a href="https://github.com/rega07cr/iPhoneCam-Windows">GitHub</a> · <a href="https://github.com/rega07cr/iPhoneCam-Windows/issues">Segnala un problema</a> · <a href="https://github.com/rega07cr/iPhoneCam-Windows/releases">Release</a></span></footer>
 </div>
 <script>
-// Punta il bottone principale all'asset .exe dell'ultima release, se disponibile.
+for(let i=0;i<16;i++){const p=document.createElement('div');p.className='petal';const s=8+Math.random()*10;p.style.cssText=`left:${Math.random()*100}vw;width:${s}px;height:${s}px;animation-duration:${7+Math.random()*8}s;animation-delay:${-Math.random()*10}s`;document.body.appendChild(p);}
 fetch('https://api.github.com/repos/rega07cr/iPhoneCam-Windows/releases/latest').then(r=>r.ok?r.json():null).then(j=>{
   if(!j){document.getElementById('ver').textContent='release su GitHub';return;}
   document.getElementById('ver').textContent='ultima versione: '+j.tag_name;
