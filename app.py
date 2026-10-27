@@ -22,7 +22,7 @@ import time
 import webbrowser
 from urllib.parse import urlparse, parse_qs
 
-__version__ = "2.4.0"
+__version__ = "2.5.0"
 
 PORT_GUI = 8080  # dashboard HTTP solo-locale per la finestra integrata
 
@@ -533,6 +533,19 @@ class H(http.server.SimpleHTTPRequestHandler):
                     pass
             return self._json({"shots": store["shots"], "bytes": total,
                                "folder": os.path.abspath(SNAP_DIR)})
+        if u.path == "/api/logfile":
+            try:
+                with open(LOG_FILE, "rb") as f:
+                    b = f.read()
+            except OSError:
+                b = b"(log vuoto)\n"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(b)))
+            self.send_header("Content-Disposition",
+                             "attachment; filename=iPhoneCam.log")
+            self.end_headers()
+            return self.wfile.write(b)
         if u.path == "/api/logs":
             try:
                 with open(LOG_FILE, encoding="utf-8") as f:

@@ -60,7 +60,9 @@ footer{border-top:1px solid rgba(255,150,200,.22);padding:26px 0 90px;color:#b9a
 <div class="grid">
 <div class="card"><h3>🎥 Streaming HD</h3><p>WebRTC fino a 1080p, con 480p/720p per le reti lente. Anteprima live sul PC.</p></div>
 <div class="card"><h3>💬 Vera webcam, senza OBS</h3><p>Un clic in Anteprima e l'iPhone diventa una webcam di Windows: selezionabile in Discord, Zoom, Teams, Meet.</p></div>
-<div class="card"><h3>🔌 USB plug-and-play</h3><p>Colleghi il cavo e il QR passa da solo all'IP USB, con qualità 1080p automatica.</p></div>
+<div class="card"><h3>🔌 USB plug-and-play</h3><p>Colleghi il cavo e il QR passa da solo all'IP USB, con qualità 1080p automatica e riconnessione senza riavviare.</p></div>
+<div class="card"><h3>🔭 Lenti reali + zoom</h3><p>Ultra 0.5×, Wide 1×, Tele 2×/5× e frontale, con zoom hardware e profili per ogni iPhone dal 7 al 18 Pro Max.</p></div>
+<div class="card"><h3>🎨 Grading &amp; audio</h3><p>Esposizione, autofocus, bilanciamento bianco, filtri anteprima, scelta microfono e riduzione rumore.</p></div>
 <div class="card"><h3>🖥️ Screen share</h3><p>Mostra lo schermo dell'iPhone in call: si attiva dal PC o dal telefono, quando vuoi.</p></div>
 <div class="card"><h3>🌱 Modalità Eco</h3><p>540p/15fps per dimezzare la CPU sui PC datati. Standard e Max per gli altri.</p></div>
 <div class="card"><h3>📱 Zero app su iOS</h3><p>Solo Safari + QR code. Niente App Store, niente account.</p></div>
@@ -90,6 +92,18 @@ footer{border-top:1px solid rgba(255,150,200,.22);padding:26px 0 90px;color:#b9a
 <p id="dlInfo">Windows 10/11 a 64 bit · nessun installer, nessun adware.</p>
 <div class="cta"><a class="btn" id="dlExe" href="https://github.com/rega07cr/iPhoneCam-Windows/releases/latest">⬇ iPhoneCam.exe (ultima release)</a></div>
 <div class="cta" style="margin-top:10px"><a class="btn ghost" href="https://github.com/rega07cr/iPhoneCam-Windows/archive/refs/heads/main.zip">📦 Sorgenti (.zip)</a><a class="btn ghost" href="https://github.com/rega07cr/iPhoneCam-Windows">⭐ GitHub</a></div>
+</div>
+
+<h2 id="bug">🐞 Bug comuni e come risolverli</h2><p class="sub">I problemi che capitano davvero, con tutorial rapido per ognuno. Nella app c'è anche la scheda 🛠️ Diagnostica che fa tutto da sola.</p>
+<div class="grid">
+<div class="card"><h3>1 · WinError 10048 (porta occupata)</h3><p>L'app non parte e parla di "socket". Hai due iPhoneCam aperte. <b>Tutorial:</b> chiudi tutte le finestre iPhoneCam (se serve: Gestione attività → iPhoneCam.exe → Termina), poi riavvia. Dalla v2.4 l'app cambia porta da sola.</p></div>
+<div class="card"><h3>2 · Il QR non si apre sull'iPhone</h3><p>PC e iPhone non si vedono. <b>Tutorial:</b> ① stesso Wi-Fi a 5 GHz su entrambi; ② su Windows consenti Python nella rete <i>privata</i>; ③ oppure collega il cavo USB con hotspot attivo e inquadra il nuovo QR.</p></div>
+<div class="card"><h3>3 · Safari: pagina nera / niente permesso</h3><p>Manca l'HTTPS. <b>Tutorial:</b> usa il link del QR così com'è (<code>https</code>, mai <code>http</code>), tocca <i>Mostra dettagli → Visita il sito</i> una volta sola, poi Consenti fotocamera e ricarica.</p></div>
+<div class="card"><h3>4 · Discord non vede la camera</h3><p>Discord legge le webcam solo all'avvio. <b>Tutorial:</b> ① in app premi 🛠️ poi ▶ Attiva; ② <b>chiudi del tutto Discord</b> (anche dall'icona in basso a destra) e riaprilo; ③ ⚙ → Voce e video → Unity Video Capture.</p></div>
+<div class="card"><h3>5 · Video a scatti o in ritardo</h3><p>Rete lenta o PC sotto sforzo. <b>Tutorial:</b> scheda Anteprima → profilo 🌱 Eco, oppure controlli remoti → 720p/480p; avvicinati al router o passa al cavo USB; chiudi app pesanti.</p></div>
+<div class="card"><h3>6 · Si disconnette da solo dopo poco</h3><p>iOS sospende Safari in background. <b>Tutorial:</b> tieni Safari in primo piano, schermo acceso, disattiva il blocco automatico (Impostazioni → Schermo) durante le call.</p></div>
+<div class="card"><h3>7 · L'audio non si sente / gracchia</h3><p><b>Tutorial:</b> su Safari consenti anche il microfono; dal PC regola con 🔊; se gracchia attiva 🎧 Riduzione rumore nella scheda Audio; per parlare usa sempre microfono o auricolari del PC.</p></div>
+<div class="card"><h3>8 · Zoom/lenti non cambiano niente</h3><p><b>Tutorial:</b> i comandi lente funzionano solo con camera posteriore e iPhone Pro; controlla in 📷 Camera la riga "Supporto telefono"; se dice "base", Safari non espone quello zoom su quel modello.</p></div>
 </div>
 
 <h2 id="faq">❓ Domande frequenti</h2>

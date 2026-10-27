@@ -8,12 +8,15 @@
 Usa il tuo **iPhone come webcam del PC** via cavo **USB** o **Wi-Fi**.
 **Nessuna app da installare sull'iPhone**: inquadri il QR, si apre Safari, e sei live.
 
-## ✨ Funzionalità (v2.4)
+## ✨ Funzionalità (v2.5)
 
 - 🌸 **Nuovo look sakura**: montagne notturne, ciliegi in fiore e petali che cadono — stessa veste su app e sito
 - 💻 **Vera webcam senza OBS**: driver integrato, installazione in 1 clic dall'app, poi selezioni *Unity Video Capture* in Discord/Zoom/Teams/Meet
 - 🔌 **USB plug-and-play**: colleghi il cavo e il QR passa da solo all'IP USB, qualità 1080p automatica
 - 🖥️ **Screen share dell'iPhone**: mostra lo schermo del telefono in call, attivabile dal PC o dal telefono
+- 🔭 **Lenti reali + zoom hardware**: Ultra 0.5×, Wide 1×, Tele 2×/5×, frontale; profili per iPhone 7 → 18 Pro Max (fino al max esposto da Safari)
+- 🎨 **Immagine & audio**: esposizione, autofocus, bilanciamento bianco, filtri anteprima, scelta microfono, riduzione rumore, livello live
+- 🛠️ **Diagnostica integrata**: test rete, reinstalla driver, scarica log, resetta connessione, copia report
 - 🌱 **Modalità Eco**: 540p/15fps per dimezzare la CPU sui PC datati
 - 🪟 **Zero console**: tutto gira nella finestra iPhoneCam, log visibili nella dashboard
 

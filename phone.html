@@ -3,53 +3,107 @@
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}
 body{margin:0;background:linear-gradient(180deg,#0b1020 0%,#1b1440 55%,#3b1d5a 100%);color:#fff;font-family:system-ui,-apple-system,sans-serif;text-align:center;padding:16px;min-height:100vh}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
-background:radial-gradient(600px 300px at 50% -60px,rgba(255,150,200,.25),transparent 70%)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;background:radial-gradient(600px 300px at 50% -60px,rgba(255,150,200,.25),transparent 70%)}
 .badge{display:inline-block;font-size:12px;background:#ffffff14;border:1px solid #ffffff2e;border-radius:999px;padding:5px 12px;color:#ffc7e3;margin-bottom:10px}
-#v{width:100%;max-height:48vh;background:#000;border-radius:14px;border:1px solid #ffffff2e}
+#v{width:100%;max-height:44vh;background:#000;border-radius:14px;border:1px solid #ffffff2e}
 #v.mirror{transform:scaleX(-1)}
-button{font-size:17px;padding:13px 22px;border-radius:14px;border:0;font-weight:700;background:linear-gradient(135deg,#ff7ab8,#a5b4fc);color:#1a0b16;margin:4px}
+button{font-size:16px;padding:12px 18px;border-radius:14px;border:0;font-weight:700;background:linear-gradient(135deg,#ff7ab8,#a5b4fc);color:#1a0b16;margin:4px}
 button.ghost{background:#ffffff14;color:#fff;border:1px solid #ffffff2e}button:disabled{opacity:.4}
 button.on{background:linear-gradient(135deg,#34d399,#22d3ee);color:#04231a}
 #st{margin-top:10px;color:#cbb8ee;font-size:14px;min-height:20px}
-.row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-select{background:#111;color:#fff;border:1px solid #ffffff2e;border-radius:10px;padding:10px;font-size:15px}
+.row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:8px;align-items:center}
+select{background:#111;color:#fff;border:1px solid #ffffff2e;border-radius:10px;padding:10px;font-size:15px;max-width:90vw}
 .hint{font-size:12px;color:#9a8fc7;margin-top:14px;line-height:1.6}
 .live{color:#34d399;font-weight:700}
 .mode{font-size:12px;color:#ffc7e3;margin-top:6px;min-height:16px}
+.lensrow button{font-size:14px;padding:10px 12px}
+input[type=range]{width:70vw;max-width:320px;accent-color:#ff7ab8}
+.lbl{font-size:12px;color:#cbb8ee}
 </style></head>
 <body>
 <div class="badge">🌸 iPhoneCam · collegato al PC</div><br>
 <video id="v" autoplay muted playsinline></video>
 <div class="mode" id="mode">modalità: fotocamera</div>
 <div class="row"><select id="cam"><option value="environment">Posteriore</option><option value="user">Frontale</option></select>
-<select id="qual"><option value="1280x720">HD 720p</option><option value="1920x1080" selected>Full HD 1080p</option><option value="640x480">SD 480p</option></select></div><br>
+<select id="qual"><option value="1280x720">HD 720p</option><option value="1920x1080" selected>Full HD 1080p</option><option value="2560x1440">QHD 1440p</option><option value="3840x2160">4K (se supportato)</option><option value="640x480">SD 480p</option></select></div>
+<div class="row lensrow"><button class="ghost" id="lU">Ultra 0.5×</button><button class="ghost" id="lW">Wide 1×</button><button class="ghost" id="lT2">Tele 2×</button><button class="ghost" id="lT5">Tele 5×</button></div>
+<div class="row"><span class="lbl">🔍 Zoom <b id="zVal">1.0×</b></span><input type="range" id="zoom" min="0.5" max="5" step="0.1" value="1"></div>
+<div class="row"><select id="mic"><option value="">🎙️ Microfono: auto</option></select></div>
+<br>
 <button id="go">▶ Avvia Camera</button>
 <div class="row"><button class="ghost" id="bTorch" disabled>🔦 Torcia</button><button class="ghost" id="bSwitch" disabled>🔄 Camera</button><button class="ghost" id="bSnap" disabled>📸 Foto</button></div>
 <div class="row"><button class="ghost" id="bScreen" disabled>🖥️ Condividi schermo</button></div>
 <div id="st">Tocca Avvia → Consenti fotocamera e microfono</div>
-<p class="hint">Tieni Safari aperto e lo schermo acceso.<br>Torcia, camera, qualità e schermo si comandano anche dal PC.<br>“Condividi schermo” mostra lo schermo dell'iPhone al PC (iOS 17+).</p>
+<p class="hint">Tieni Safari aperto e lo schermo acceso.<br>Lenti, zoom, esposizione e microfono si comandano anche dal PC.<br>“Condividi schermo” (iOS 17+) mostra lo schermo al PC.</p>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
 const st=m=>$('st').innerHTML=m;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let pc=null,stream=null,sender=null,videoTrack=null,camTrack=null,screenStream=null,iceN=0,ctlN=0,torchOn=false,running=false,sharing=false;
+let pc=null,stream=null,sender=null,aSender=null,videoTrack=null,camTrack=null,screenStream=null,iceN=0,ctlN=0,torchOn=false,running=false,sharing=false;
+let caps={zoom:null,exposure:null,focusModes:[],wbModes:[],torch:false};
+let audioCfg={deviceId:"",echo:true,denoise:true};
 async function api(p,o){const r=await fetch(p,Object.assign({headers:{'Content-Type':'application/json'}},o||{}));return r.json();}
 async function evt(e){try{await api('/api/event',{method:'POST',body:JSON.stringify(e)});}catch{}}
 function applyMirror(){$('v').classList.toggle('mirror',$('cam').value==='user'&&!sharing);}
 $('cam').onchange=applyMirror;
+// --- Zoom reale (su iPhone lo zoom ottico scatta in automatico alla lente giusta) ---
+async function setZoom(z){
+  z=Math.max(0.5,Math.min(10,z));
+  try{await videoTrack.applyConstraints({advanced:[{zoom:z}]});}catch{}
+  $('zoom').value=Math.min(5,Math.max(0.5,z));$('zVal').textContent=z.toFixed(1)+'×';
+}
+$('zoom').oninput=e=>setZoom(parseFloat(e.target.value));
+function lens(z){if($('cam').value!=='environment')$('cam').value='environment';setZoom(z);}
+$('lU').onclick=()=>lens(0.5);$('lW').onclick=()=>lens(1);$('lT2').onclick=()=>lens(2);$('lT5').onclick=()=>lens(5);
 async function startStream(){
   const[w,h]=$('qual').value.split('x').map(Number);
-  const c={video:{facingMode:$('cam').value,width:{ideal:w},height:{ideal:h},frameRate:{ideal:30}},audio:{echoCancellation:true,noiseSuppression:true}};
+  const c={video:{facingMode:$('cam').value,width:{ideal:w},height:{ideal:h},frameRate:{ideal:60}},audio:{deviceId:audioCfg.deviceId||undefined,echoCancellation:audioCfg.echo,noiseSuppression:audioCfg.denoise}};
   const ns=await navigator.mediaDevices.getUserMedia(c);
   if(!stream){stream=ns;}
-  else{const nv=ns.getVideoTracks()[0];
+  else{
+    const nv=ns.getVideoTracks()[0];
     if(sender)await sender.replaceTrack(nv);
-    stream.getVideoTracks().forEach(t=>{if(t!==videoTrack)t.stop&&t.stop();});
-    stream.removeTrack(stream.getVideoTracks()[0]);stream.addTrack(nv);
-    videoTrack=nv;applyMirror();return;}
-  videoTrack=ns.getVideoTracks()[0];camTrack=videoTrack;applyMirror();
+    try{stream.removeTrack(stream.getVideoTracks()[0]);}catch{}
+    stream.addTrack(nv);
+    stream.getVideoTracks().forEach((t,i)=>{if(i>0)t.stop();});
+    ns.getAudioTracks().forEach(t=>t.stop());
+    videoTrack=nv;applyMirror();await readCaps();return;
+  }
+  videoTrack=stream.getVideoTracks()[0];camTrack=videoTrack;applyMirror();
+  await readCaps();await listMics();
+}
+async function readCaps(){
+  try{
+    const cp=videoTrack.getCapabilities();
+    caps.zoom=cp.zoom||null;
+    caps.exposure=(cp.exposureCompensation!=null)?cp.exposureCompensation:null;
+    caps.focusModes=cp.focusMode||[];caps.wbModes=cp.whiteBalanceMode||[];
+    caps.torch=!!cp.torch;
+    if(cp.zoom){$('zoom').min=Math.max(0.5,cp.zoom.min);$('zoom').max=Math.min(10,cp.zoom.max);$('zoom').step=cp.zoom.step||0.1;}
+    await evt({type:'caps',caps:{zoom:cp.zoom||null,exposure:cp.exposureCompensation||null,focus:cp.focusMode||null,wb:cp.whiteBalanceMode||null,torch:!!cp.torch,mic:true}});
+  }catch{}
+}
+async function listMics(){
+  try{
+    const devs=await navigator.mediaDevices.enumerateDevices();
+    const mics=devs.filter(d=>d.kind==='audioinput');
+    const sel=$('mic');sel.innerHTML='<option value="">🎙️ Microfono: auto</option>';
+    mics.forEach((m,i)=>{const o=document.createElement('option');o.value=m.deviceId;o.textContent='🎙️ '+(m.label||('Microfono '+(i+1)));sel.appendChild(o);});
+    await evt({type:'mics',mics:mics.map((m,i)=>({id:m.deviceId,label:m.label||('Microfono '+(i+1))}))});
+  }catch{}
+}
+$('mic').onchange=async e=>{audioCfg.deviceId=e.target.value;await restartAudio();};
+async function restartAudio(){
+  try{
+    const ns=await navigator.mediaDevices.getUserMedia({audio:{deviceId:audioCfg.deviceId||undefined,echoCancellation:audioCfg.echo,noiseSuppression:audioCfg.denoise}});
+    const nt=ns.getAudioTracks()[0];
+    if(aSender)await aSender.replaceTrack(nt);
+    stream.getAudioTracks().forEach(t=>t.stop());
+    try{stream.removeTrack(stream.getAudioTracks()[0]);}catch{}
+    stream.addTrack(nt);
+    await evt({type:'mic-ok'});
+  }catch{await evt({type:'error',msg:'Microfono non cambiato'});}
 }
 async function setTorch(on){
   try{await videoTrack.applyConstraints({advanced:[{torch:!!on}]});torchOn=!!on;await evt({type:'torch',on:torchOn});}
@@ -62,14 +116,13 @@ async function snap(upload){
   if(upload)await api('/api/shot',{method:'POST',body:JSON.stringify({jpeg})});
   return jpeg;}catch(e){await evt({type:'error',msg:'Scatto fallito'});}
 }
-// --- Screen share: sostituisce il track video inviato al PC ---
 async function startScreen(){
   if(!navigator.mediaDevices.getDisplayMedia){await evt({type:'error',msg:'Screen share non supportato su questo iOS'});return false;}
   try{
     screenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
     const strack=screenStream.getVideoTracks()[0];
     if(sender)await sender.replaceTrack(strack);
-    if(stream){stream.removeTrack(videoTrack);stream.addTrack(strack);}
+    if(stream){try{stream.removeTrack(videoTrack);}catch{}stream.addTrack(strack);}
     videoTrack=strack;sharing=true;
     $('mode').textContent='modalità: schermo iPhone 🖥️';
     $('bScreen').textContent='⏹️ Ferma schermo';$('bScreen').classList.add('on');
@@ -79,16 +132,12 @@ async function startScreen(){
   }catch{return false;}
 }
 async function stopScreen(){
-  if(!sharing)return;
-  sharing=false;
+  if(!sharing)return;sharing=false;
   try{
     if(screenStream)screenStream.getTracks().forEach(t=>t.stop());
     screenStream=null;
-    if(camTrack){
-      if(sender)await sender.replaceTrack(camTrack);
-      if(stream){try{stream.removeTrack(videoTrack);}catch{}stream.addTrack(camTrack);}
-      videoTrack=camTrack;
-    } else { await startStream(); if(sender&&videoTrack)await sender.replaceTrack(videoTrack); }
+    if(camTrack){if(sender)await sender.replaceTrack(camTrack);if(stream){try{stream.removeTrack(videoTrack);}catch{}stream.addTrack(camTrack);}videoTrack=camTrack;}
+    else{await startStream();if(sender&&videoTrack)await sender.replaceTrack(videoTrack);}
     $('v').srcObject=stream;
   }catch{}
   $('mode').textContent='modalità: fotocamera';
@@ -101,11 +150,11 @@ $('bSnap').onclick=async()=>{await snap(true);st('📸 Foto inviata al PC');};
 $('bSwitch').onclick=async()=>{if(sharing)return;$('cam').value=$('cam').value==='environment'?'user':'environment';await restartVideo();};
 async function restartVideo(){
   st('Cambio camera…');const[w,h]=$('qual').value.split('x').map(Number);
-  const ns=await navigator.mediaDevices.getUserMedia({video:{facingMode:$('cam').value,width:{ideal:w},height:{ideal:h},frameRate:{ideal:30}}});
-  const nv=ns.getVideoTracks()[0];camTrack=nv;
-  if(sender)await sender.replaceTrack(nv);
-  stream.getVideoTracks().forEach(t=>t.stop());stream.removeTrack(stream.getVideoTracks()[0]);stream.addTrack(nv);
-  videoTrack=nv;$('v').srcObject=stream;applyMirror();torchOn=false;
+  const ns=await navigator.mediaDevices.getUserMedia({video:{facingMode:$('cam').value,width:{ideal:w},height:{ideal:h},frameRate:{ideal:60}}});
+  const nv=ns.getVideoTracks()[0];camTrack=(sharing?camTrack:nv);
+  if(sender&&!sharing)await sender.replaceTrack(nv);
+  if(!sharing){stream.getVideoTracks().forEach(t=>t.stop());try{stream.removeTrack(stream.getVideoTracks()[0]);}catch{}stream.addTrack(nv);videoTrack=nv;}
+  $('v').srcObject=stream;applyMirror();torchOn=false;await readCaps();
 }
 async function pollControl(){
   while(running){try{
@@ -114,6 +163,13 @@ async function pollControl(){
       if(c.type==='torch')await setTorch(c.on);
       else if(c.type==='switch'){$('cam').value=$('cam').value==='environment'?'user':'environment';await restartVideo();}
       else if(c.type==='quality'&&c.w){$('qual').value=c.w+'x'+c.h;await restartVideo();}
+      else if(c.type==='lens'){if(c.front){$('cam').value='user';await restartVideo();}else{if($('cam').value!=='environment'){$('cam').value='environment';await restartVideo();}await setZoom(c.zoom||1);}}
+      else if(c.type==='zoom'&&c.z!=null)await setZoom(c.z);
+      else if(c.type==='exposure'&&c.v!=null){try{await videoTrack.applyConstraints({advanced:[{exposureCompensation:c.v}]})}catch{}}
+      else if(c.type==='focus'){try{await videoTrack.applyConstraints({advanced:[{focusMode:c.mode||'continuous'}]})}catch{}}
+      else if(c.type==='wb'){try{await videoTrack.applyConstraints({advanced:[{whiteBalanceMode:c.mode||'continuous'}]})}catch{}}
+      else if(c.type==='mic'&&c.id!=null){audioCfg.deviceId=c.id;$('mic').value=c.id;await restartAudio();}
+      else if(c.type==='denoise'){audioCfg.echo=!!c.echo;audioCfg.denoise=!!c.denoise;await restartAudio();}
       else if(c.type==='snap'){await snap(true);await evt({type:'shot-done'});}
       else if(c.type==='screen'){if(c.on&&!sharing)await startScreen();else if(!c.on&&sharing)await stopScreen();}
       else if(c.type==='ping'){await evt({type:'pong',t:c.t});}
@@ -121,18 +177,15 @@ async function pollControl(){
     await sleep(1200);}
 }
 async function connect(){
-  running=true;
-  pc=new RTCPeerConnection();
-  stream.getTracks().forEach(t=>{const s=pc.addTrack(t,stream);if(t.kind==='video')sender=s;});
+  running=true;pc=new RTCPeerConnection();
+  stream.getTracks().forEach(t=>{const s=pc.addTrack(t,stream);if(t.kind==='video')sender=s;else aSender=s;});
   pc.onicecandidate=e=>{if(e.candidate)api('/api/ice-phone',{method:'POST',body:JSON.stringify({c:e.candidate})});};
-  pc.onconnectionstatechange=async()=>{st('Stato: <b>'+pc.connectionState+'</b>');
-    if(pc.connectionState==='failed'){await reconnect();}};
+  pc.onconnectionstatechange=async()=>{st('Stato: <b>'+pc.connectionState+'</b>');if(pc.connectionState==='failed'){await reconnect();}};
   const offer=await pc.createOffer();await pc.setLocalDescription(offer);
   await api('/api/offer',{method:'POST',body:JSON.stringify({sdp:offer.sdp})});
   st('Offerta inviata, attendo il PC… <span class="live">●</span>');
-  while(running){
-    try{const a=await(await fetch('/api/answer')).json();
-      if(a.sdp){await pc.setRemoteDescription({type:'answer',sdp:a.sdp});st('<span class="live">● LIVE</span> — tieni questa pagina aperta');break;}}catch{}
+  while(running){try{const a=await(await fetch('/api/answer')).json();
+    if(a.sdp){await pc.setRemoteDescription({type:'answer',sdp:a.sdp});st('<span class="live">● LIVE</span> — tieni questa pagina aperta');break;}}catch{}
     await sleep(1200);}
   pollIce();pollControl();reportBattery();
 }
