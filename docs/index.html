@@ -1,0 +1,104 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iPhoneCam — Usa l'iPhone come webcam Windows</title>
+<meta name="description" content="iPhoneCam: usa l'iPhone come webcam del PC via USB o Wi-Fi. Nessuna app da installare su iOS, solo Safari + QR. Gratis e open source.">
+<style>
+:root{--bg:#0b1020;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--txt:#eef2ff;--mut:#9aa4c7;--acc:#7c6cff;--acc2:#22d3ee;--ok:#34d399}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--txt);background:radial-gradient(1100px 550px at 85% -5%,#2b2a6b55 0%,transparent 60%),radial-gradient(800px 450px at 5% 8%,#0e3a5d66 0%,transparent 55%),var(--bg)}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;backdrop-filter:blur(14px);background:rgba(11,16,32,.75);border-bottom:1px solid var(--line);z-index:10}
+header .wrap{display:flex;align-items:center;gap:12px;padding:12px 20px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-size:20px}
+nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}nav a{color:var(--mut);text-decoration:none;font-size:13.5px;padding:8px 12px;border-radius:10px}nav a:hover{color:var(--txt);background:var(--card)}
+.btn{display:inline-block;border:0;cursor:pointer;border-radius:12px;padding:13px 24px;font-weight:700;font-size:15px;color:#0b1020;background:linear-gradient(135deg,var(--acc2),#a5b4fc);text-decoration:none;box-shadow:0 8px 28px rgba(34,211,238,.35)}
+.btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line);box-shadow:none}
+.hero{text-align:center;padding:72px 0 40px}
+.hero h1{font-size:clamp(32px,5vw,54px);margin:14px 0 10px;line-height:1.1}
+.hero h1 span{background:linear-gradient(135deg,var(--acc2),#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);font-size:17px;max-width:640px;margin:0 auto 26px;line-height:1.6}
+.ver{display:inline-block;font-size:12.5px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:6px}
+.cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.note{font-size:12.5px;color:var(--mut);margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:26px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h3{margin:0 0 6px;font-size:15.5px}.card p{margin:0;color:var(--mut);font-size:13.5px;line-height:1.55}
+h2{font-size:24px;margin:46px 0 6px}.sub{color:var(--mut);font-size:14px;margin:0 0 16px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
+.step .n{font-size:30px}.step b{display:block;margin:8px 0 6px}.step p{color:var(--mut);font-size:13.5px;margin:0;line-height:1.55}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}.th,.td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+code,.kbd{font-size:12.5px;border:1px solid var(--line);border-radius:7px;padding:2px 8px;background:rgba(0,0,0,.35);font-family:Consolas,monospace}
+.dl{background:linear-gradient(135deg,rgba(124,108,255,.18),rgba(34,211,238,.12));border:1px solid var(--line);border-radius:20px;padding:34px;text-align:center;margin:40px 0}
+.dl h2{margin:0 0 8px}.dl p{color:var(--mut);font-size:14px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:8px 0;font-size:14px}summary{cursor:pointer;font-weight:600}details p{color:var(--mut);line-height:1.6}
+footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--mut);font-size:13px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}footer a{color:var(--acc2)}
+.req{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--mut)}
+</style></head>
+<body>
+<header><div class="wrap"><div class="logo">📷</div><b>iPhoneCam</b>
+<nav><a href="#funzioni">Funzioni</a><a href="#come">Come funziona</a><a href="#virtual">Zoom &amp; Teams</a><a href="#faq">FAQ</a><a href="#download">Download</a></nav></div></header>
+<div class="wrap">
+
+<div class="hero">
+<div class="ver" id="ver">ultima versione: …</div>
+<h1>L'iPhone diventa la <span>webcam del PC</span></h1>
+<p>Via cavo USB o Wi-Fi, <b>senza installare alcuna app sull'iPhone</b>: inquadri il QR, si apre Safari, e sei live in Zoom, Teams, Meet, Discord e OBS.</p>
+<div class="cta"><a class="btn" id="dlMain" href="https://github.com/rega07cr/iPhoneCam-Windows/releases/latest">⬇ Scarica per Windows</a><a class="btn ghost" href="https://github.com/rega07cr/iPhoneCam-Windows">⭐ Codice su GitHub</a></div>
+<div class="req"><span>🪟 Windows 10/11</span><span>📱 iPhone con Safari</span><span>💰 Gratis · open source (MIT)</span></div>
+<p class="note" id="dlNote">Download diretto dell'eseguibile dall'ultima release.</p>
+</div>
+
+<h2 id="funzioni">✨ Funzioni</h2><p class="sub">Tutto quello che ti serve, niente di superfluo.</p>
+<div class="grid">
+<div class="card"><h3>🎥 Streaming HD</h3><p>WebRTC fino a 1080p, con 480p/720p per le reti lente. Anteprima live sul PC.</p></div>
+<div class="card"><h3>📱 Zero app su iOS</h3><p>Solo Safari + QR code. Niente App Store, niente account, niente cavi strani.</p></div>
+<div class="card"><h3>🔌 USB o Wi-Fi</h3><p>Tethering USB rilevato in automatico per la latenza minima, oppure stesso Wi-Fi.</p></div>
+<div class="card"><h3>🎛️ Controlli remoti</h3><p>Torcia, cambio camera, qualità e test latenza comandati dal PC in tempo reale.</p></div>
+<div class="card"><h3>📸 Foto e ⏺️ video</h3><p>Scatti dal PC o in alta qualità dall'iPhone, galleria integrata, registrazione WebM.</p></div>
+<div class="card"><h3>📊 Sempre sotto controllo</h3><p>Risoluzione, FPS, bitrate, latenza e batteria iPhone in diretta.</p></div>
+<div class="card"><h3>🖥️ Pronto per OBS</h3><p>Modalità popout per la sorgente Browser + guida Virtual Camera in 2 minuti.</p></div>
+<div class="card"><h3>🔒 Privato</h3><p>Tutto resta in rete locale: nessun cloud, nessun account, codice open source.</p></div>
+</div>
+
+<h2 id="come">🚀 Come funziona</h2><p class="sub">Dal download al live in meno di 2 minuti.</p>
+<div class="steps">
+<div class="step"><div class="n">①</div><b>Avvia sul PC</b><p>Scarica, scompatta, doppio clic su <code>Avvia-iPhoneCam.bat</code>. Si apre la dashboard con il QR.</p></div>
+<div class="step"><div class="n">②</div><b>Inquadra con l'iPhone</b><p>Fotocamera nativa → apri il link in <b>Safari</b> → accetta il certificato una volta → Consenti fotocamera.</p></div>
+<div class="step"><div class="n">③</div><b>Sei LIVE</b><p>Anteprima sul PC, controlli remoti, foto e registrazione. Tieni Safari in primo piano.</p></div>
+</div>
+
+<h2 id="virtual">🎙️ Usarla in Zoom, Teams, Meet, Discord</h2><p class="sub">Il driver virtuale diretto è in roadmap; intanto il ponte OBS richiede 2 minuti, una volta sola.</p>
+<div class="steps">
+<div class="step"><div class="n">📦</div><b>Installa OBS Studio</b><p>Gratis da obsproject.com. La Virtual Camera è integrata dalla versione 28.</p></div>
+<div class="step"><div class="n">🌐</div><b>Sorgente Browser</b><p>URL <code>https://127.0.0.1:4443/?popout=1</code>, poi in OBS <b>Avvia Virtual Camera</b>.</p></div>
+<div class="step"><div class="n">✅</div><b>Selezionala ovunque</b><p>In Zoom/Teams/Meet/Discord scegli <b>OBS Virtual Camera</b> come webcam.</p></div>
+</div>
+
+<h2 id="download">⬇ Download</h2><p class="sub">Scegli il formato che preferisci. Sempre gratis, sempre open source.</p>
+<div class="dl">
+<h2>Scarica iPhoneCam per Windows</h2>
+<p id="dlInfo">Windows 10/11 a 64 bit · nessun installer, nessun adware.</p>
+<div class="cta"><a class="btn" id="dlExe" href="https://github.com/rega07cr/iPhoneCam-Windows/releases/latest">⬇ iPhoneCam.exe (ultima release)</a></div>
+<div class="cta" style="margin-top:10px"><a class="btn ghost" href="https://github.com/rega07cr/iPhoneCam-Windows/archive/refs/heads/main.zip">📦 Sorgenti (.zip)</a><a class="btn ghost" href="https://github.com/rega07cr/iPhoneCam-Windows">⭐ GitHub</a></div>
+</div>
+
+<h2 id="faq">❓ Domande frequenti</h2>
+<details><summary>Devo installare qualcosa sull'iPhone?</summary><p>No. Solo Safari: inquadri il QR con la Fotocamera, apri il link, consenti l'accesso alla fotocamera. Fine.</p></details>
+<details><summary>Perché devo accettare un certificato?</summary><p>iOS permette l'accesso alla fotocamera solo su connessioni sicure (HTTPS). L'app genera un certificato in locale, sulla tua rete: lo accetti una volta sola, resta tutto in casa tua.</p></details>
+<details><summary>USB o Wi-Fi?</summary><p>Entrambi. L'USB (tethering con Apple Devices/iTunes) ha meno latenza; il Wi-Fi a 5 GHz va benissimo. L'app rileva da sola l'IP giusto.</p></details>
+<details><summary>Funziona con Zoom / Teams / Meet?</summary><p>Sì, tramite OBS Virtual Camera (guida sopra). Il driver virtuale integrato è in arrivo.</p></details>
+<details><summary>È gratis? I miei video vanno online?</summary><p>Gratis e MIT open source. Il video viaggia solo nella tua rete locale, nessun server esterno.</p></details>
+<details><summary>Non si collega, che faccio?</summary><p>Stesso Wi-Fi su PC e iPhone? Certificato accettato? Firewall: consenti Python sulla rete privata (c'è <code>Apri-Firewall.bat</code>). Prova 720p o 480p dai controlli remoti.</p></details>
+
+<footer><span>📷 <b>iPhoneCam</b> · MIT open source</span><span style="margin-left:auto"><a href="https://github.com/rega07cr/iPhoneCam-Windows">GitHub</a> · <a href="https://github.com/rega07cr/iPhoneCam-Windows/issues">Segnala un problema</a> · <a href="https://github.com/rega07cr/iPhoneCam-Windows/releases">Release</a></span></footer>
+</div>
+<script>
+// Punta il bottone principale all'asset .exe dell'ultima release, se disponibile.
+fetch('https://api.github.com/repos/rega07cr/iPhoneCam-Windows/releases/latest').then(r=>r.ok?r.json():null).then(j=>{
+  if(!j){document.getElementById('ver').textContent='release su GitHub';return;}
+  document.getElementById('ver').textContent='ultima versione: '+j.tag_name;
+  const exe=(j.assets||[]).find(a=>/\.exe$/i.test(a.name))||(j.assets||[]).find(a=>/portable.*\.zip$/i.test(a.name));
+  if(exe){document.getElementById('dlMain').href=exe.browser_download_url;document.getElementById('dlExe').href=exe.browser_download_url;
+    document.getElementById('dlNote').textContent='Download diretto: '+exe.name+' ('+(exe.size/1048576).toFixed(1)+' MB).';
+    document.getElementById('dlInfo').textContent='Versione '+j.tag_name+' · Windows 10/11 a 64 bit · nessun installer.';}
+}).catch(()=>{});
+</script></body></html>
