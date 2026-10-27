@@ -69,6 +69,12 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 <select id="cQual" disabled><option value="1280x720">HD 720p</option><option value="1920x1080" selected>Full HD 1080p</option><option value="640x480">SD 480p (rete lenta)</option></select>
 <button class="ghost" id="cPing" disabled>📡 Test latenza</button>
 </div></div>
+<div class="card" style="margin-top:16px" id="vcamCard"><h2>💻 Webcam virtuale (Discord · Zoom · Teams)</h2><p>Trasforma il LIVE in una <b>vera webcam di Windows</b>: poi la selezioni in qualsiasi app.</p>
+<div class="statusbar"><span class="dot" id="vdot"></span><span id="vstatus">Controllo driver…</span></div>
+<div class="row"><button class="act" id="vOn">▶ Attiva webcam virtuale</button><button class="ghost" id="vOff" disabled>⏹ Ferma</button><label style="font-size:13px;color:var(--mut)"><input type="checkbox" id="vAuto"> auto con LIVE</label></div>
+<div class="statbar"><span>Dispositivo <b id="vDev">—</b></span><span>Invio <b id="vFps">—</b></span></div>
+<div id="vDriverBox" class="hidden"><p>⚠️ <b>Nessun driver trovato.</b><br>1) Doppio clic su <span class="kbd">Registra-Webcam-Virtuale.bat</span> nella cartella dell'app → consenti come amministratore.<br>2) Riavvia Discord/Zoom/Teams (devono rileggere le webcam).<br>Alternativa: installa <b>OBS Studio</b> (include la sua virtual camera).</p><div class="row"><button class="ghost" id="vRecheck">🔄 Ricontrolla driver</button></div></div>
+</div>
 <div class="card" style="margin-top:16px" id="logCard"><h2>Log</h2><div id="log"></div></div>
 </div></div></div>
 
@@ -82,10 +88,16 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 <div class="card" style="margin-top:12px"><h2>🩺 Diagnostica</h2><div id="diag" style="font-size:13px;color:var(--mut)">Premi Diagnostica…</div></div>
 </div></div>
 
-<div class="tabpage" id="pg-guida"><div class="card"><h2>❓ Guida rapida</h2>
-<p><b>1.</b> Avvia l'app sul PC → <b>2.</b> QR con Fotocamera iPhone → <b>3.</b> "Apri in Safari" → <b>4.</b> accetta certificato (una volta sola) → <b>5.</b> Consenti fotocamera → LIVE. Tieni Safari in primo piano con schermo acceso.<br><br>
-<b>Zoom / Teams / Meet / Discord:</b> installa una volta <i>OBS Virtual Camera</i>, in OBS aggiungi sorgente <span class="kbd">Browser</span> con URL <span class="kbd" id="popUrl">…</span> (aggiungi <span class="kbd">?popout=1</span>), poi <span class="kbd">Avvia Virtual Camera</span> e selezionala come webcam. Il driver diretto è in roadmap.<br><br>
-<b>Non si collega?</b> Stesso Wi-Fi? Certificato accettato? Firewall: consenti Python sulla rete privata. Prova 720p o 480p.</p></div></div>
+<div class="tabpage" id="pg-guida">
+<div class="card"><h2>📲 Collegare l'iPhone (2 minuti)</h2>
+<p><b>1.</b> Avvia l'app sul PC: si apre la finestra iPhoneCam con il <b>QR</b>.<br><b>2.</b> Inquadra il QR con la <b>Fotocamera</b> dell'iPhone → tocca <b>"Apri in Safari"</b>.<br><b>3.</b> Se Safari avvisa del certificato: <i>Mostra dettagli → Visita il sito</i> (una volta sola).<br><b>4.</b> Tocca <b>Avvia Camera → Consenti</b> fotocamera (e microfono se vuoi l'audio).<br><b>5.</b> Sul PC vedi <b>LIVE</b>. Tieni Safari in primo piano e lo schermo acceso: iOS mette in pausa le pagine in background.</p></div>
+<div class="card" style="margin-top:16px"><h2>💬 Usarla in Discord</h2>
+<p><b>Prima volta:</b> <b>1.</b> premi <b>▶ Attiva webcam virtuale</b> nella scheda Anteprima (installa il driver una volta con <span class="kbd">Registra-Webcam-Virtuale.bat</span> se richiesto). <b>2.</b> <b>Chiudi e riapri Discord</b> (rileva le webcam all'avvio). <b>3.</b> In Discord: <span class="kbd">⚙ Impostazioni → Voce e video → Videocamera</span> → scegli <b>Unity Video Capture</b> → <b>Prova video</b>. <b>4.</b> In chiamata premi l'icona <b>📹 Attiva videocamera</b>.<br>Stessi passi in <b>Zoom</b> (⚙ → Video → Fotocamera), <b>Teams</b> (… → Impostazioni → Dispositivi) e <b>Meet</b> su Chrome (⋮ → Impostazioni → Video).</p></div>
+<div class="card" style="margin-top:16px"><h2>🔌 USB vs Wi-Fi · Audio · OBS</h2>
+<p><b>USB (consigliato):</b> installa <i>Apple Devices</i> dal Microsoft Store (o iTunes), collega il cavo, sull'iPhone tocca <b>Autorizza</b> e attiva <span class="kbd">Hotspot personale → Solo USB</span>. Il QR userà da solo l'IP <span class="kbd">172.20.10.x</span>. Latenza tipica 60–90 ms.<br><b>Wi-Fi:</b> stesso Wi-Fi a 5 GHz per PC e iPhone, 720p se scatta (≈4–8 Mbps a 1080p).<br><b>Audio:</b> l'audio dell'iPhone arriva insieme al video (consenti il microfono). Per parlare usa microfono/auricolari del PC.<br><b>OBS:</b> aggiungi sorgente <span class="kbd">Browser</span> con URL <span class="kbd" id="popUrl">…</span> (schermo intero, 1280×720). Oppure seleziona direttamente <b>Unity Video Capture</b> come <i>Dispositivo di cattura video</i>: zero configurazione.</p></div>
+<div class="card" style="margin-top:16px"><h2>🛠️ Se qualcosa non va</h2>
+<p><b>QR non si apre:</b> PC e iPhone sulla stessa rete? Firewall: consenti Python sulla rete <i>privata</i> (<span class="kbd">Apri-Firewall.bat</span> come amministratore) o prova l'USB.<br><b>Pagina Safari nera / nessun permesso:</b> ricarica e tocca Consenti; serve <span class="kbd">https</span>, non http.<br><b>Discord non vede la camera:</b> driver registrato? Discord riavviato dopo l'installazione? Webcam virtuale <b>▶ Attiva</b> e iPhone LIVE?<br><b>Scatta / ritardi:</b> passa a 720p o 480p dai controlli remoti; avvicinati al router; chiudi app pesanti.<br><b>Si disconnette:</b> iOS sospende Safari in background — tienilo aperto e disattiva il blocco automatico durante le chiamate.</p></div>
+</div>
 </div>
 <script>
 "use strict";
@@ -152,6 +164,49 @@ async function loadShots(){try{const r=await(await fetch('/api/shots')).json();c
 for(const f of r.shots){const d=document.createElement('div');d.className='shot';d.innerHTML=`<img loading="lazy" src="/shots/${f}"><div><span>${f}</span><span><a href="/shots/${f}" download>⬇</a> <button>✕</button></span></div>`;d.querySelector('button').onclick=async()=>{await fetch('/api/shots/'+f,{method:'DELETE'});loadShots();};g.appendChild(d);}}catch{}}
 $('bRefresh').onclick=loadShots;
 $('bFw').onclick=()=>alert('Se il QR non si apre:\n1. Prima connessione: Windows chiede "Consenti Python nella rete privata" → consenti.\n2. Altrimenti: Impostazioni → Firewall → Consenti app → python.exe → spunta Privata.\n3. Oppure esegui Apri-Firewall.bat come amministratore.');
-$('bDiag').onclick=async()=>{const r=await(await fetch('/api/info')).json();$('diag').innerHTML=`Versione server: <b>${r.version}</b><br>IP rilevati: <b>${r.ips.join(', ')}</b><br>Tethering USB attivo: <b>${r.ips.some(i=>i.startsWith('172.20.10.'))?'SÌ':'no'}</b><br>Dashboard raggiungibile: <b>sì</b> (stai leggendo questa pagina)<br>Offerta iPhone in attesa: <b>${(await(await fetch('/api/offer')).json()).sdp?'sì':'no'}</b>`;};
-info().then(()=>{setInterval(loop,1500);log('iPhoneCam pronto');});
+// webcam virtuale: il browser invia frame JPEG via WebSocket, Python li gira al driver
+let ws=null,bridgeOn=false,bSent=0,bT=Date.now(),vOn=false;
+const vcanvas=document.createElement('canvas');vcanvas.width=1280;vcanvas.height=720;
+if(localStorage.getItem('vauto')==='1')$('vAuto').checked=true;
+$('vAuto').onchange=()=>localStorage.setItem('vauto',$('vAuto').checked?'1':'0');
+async function vcamRefresh(){
+ try{const s=await(await fetch('/api/vcam')).json();
+ $('vDriverBox').classList.toggle('hidden',s.detected.ok);
+ const names=Object.values(s.detected.backends||{});
+ if(s.active){$('vdot').className='dot ok';$('vstatus').textContent='🟢 LIVE su '+(s.device||'?')+' · '+s.fps_actual+' fps';$('vDev').textContent=s.device||'?';$('vFps').textContent=s.fps_actual+' fps';$('vOff').disabled=false;}
+ else{$('vdot').className='dot';$('vstatus').textContent=s.detected.ok?('Driver pronto: '+names.join(', ')+' — premi Attiva'):'Driver non trovato';$('vDev').textContent=names.join(', ')||'—';$('vFps').textContent='—';$('vOff').disabled=true;}
+ if(s.err)log('VirtualCam: '+s.err);}catch{}}
+function vcamMsg(t){$('vFps').textContent=t;}
+$('vRecheck').onclick=async()=>{await fetch('/api/vcam');vcamRefresh();};
+$('vOn').onclick=async()=>{
+ if(!connected){log('Collega prima l\u2019iPhone (LIVE), poi attiva la webcam virtuale.');alert('Collega prima l\u2019iPhone: inquadra il QR e attendi il LIVE.');return;}
+ const r=await api('/api/vcam',{method:'POST',body:JSON.stringify({action:'start',w:1280,h:720,fps:20})});
+ if(!r.ok){vcamRefresh();alert('Webcam virtuale non avviata:\n'+(r.err||'?'));return;}
+ vOn=true;$('vOn').disabled=true;wsConnect();log('Webcam virtuale: '+r.device);vcamRefresh();
+ if($('vAuto').checked)localStorage.setItem('vauto','1');};
+$('vOff').onclick=async()=>{bridgeStop();await api('/api/vcam',{method:'POST',body:JSON.stringify({action:'stop'})});$('vOn').disabled=false;vcamRefresh();log('Webcam virtuale fermata');};
+function wsConnect(){
+ try{if(ws)ws.close();}catch{}
+ const pr=location.protocol==='https:'?'wss://':'ws://';
+ ws=new WebSocket(pr+location.host+'/ws/frames');ws.binaryType='arraybuffer';
+ ws.onopen=()=>{bridgeOn=true;log('Ponte frame collegato');pump();};
+ ws.onclose=()=>{bridgeOn=false;if(vOn)setTimeout(()=>{if(vOn)wsConnect();},1500);};
+ ws.onerror=()=>{};}
+function bridgeStop(){vOn=false;bridgeOn=false;try{if(ws)ws.close();}catch{}ws=null;$('vOn').disabled=false;}
+function pump(){
+ if(!bridgeOn||!ws||ws.readyState!==1)return;
+ const v=$('preview');
+ if(!connected||!v.videoWidth){setTimeout(pump,600);return;}
+ const x=vcanvas.getContext('2d');
+ const vw=v.videoWidth,vh=v.videoHeight,ta=16/9,va=vw/vh;
+ let sw=vw,sh=vh,sx=0,sy=0;
+ if(va>ta){sw=vh*ta;sx=(vw-sw)/2;}else{sh=vw/ta;sy=(vh-sh)/2;}
+ x.drawImage(v,sx,sy,sw,sh,0,0,1280,720);
+ vcanvas.toBlob(b=>{if(b&&bridgeOn&&ws&&ws.readyState===1){try{ws.send(b);bSent++;}catch{}}setTimeout(pump,40);},'image/jpeg',0.75);}
+setInterval(()=>{if(bridgeOn)$('vFps').textContent=(bSent*1000/(Date.now()-bT)).toFixed(0)+' fps invio';bSent=0;bT=Date.now();},2000);
+const _resetPeer=resetPeer;
+resetPeer=function(){bridgeStop();_resetPeer();};
+$('bDiag').onclick=async()=>{const r=await(await fetch('/api/info')).json();const vc=await(await fetch('/api/vcam')).json().catch(()=>null);
+$('diag').innerHTML=`Versione server: <b>${r.version}</b><br>IP rilevati: <b>${r.ips.join(', ')}</b><br>Tethering USB attivo: <b>${r.ips.some(i=>i.startsWith('172.20.10.'))?'SÌ':'no'}</b><br>Dashboard raggiungibile: <b>sì</b> (stai leggendo questa pagina)<br>Offerta iPhone in attesa: <b>${(await(await fetch('/api/offer')).json()).sdp?'sì':'no'}</b><br>Driver webcam: <b>${vc?(vc.detected.ok?Object.values(vc.detected.backends).join(', '):'NON TROVATO'):'?'}</b><br>Webcam virtuale attiva: <b>${vc&&vc.active?'SÌ ('+vc.frames_sent+' frame)':'no'}</b>`;};
+info().then(()=>{setInterval(loop,1500);vcamRefresh();setInterval(vcamRefresh,8000);log('iPhoneCam pronto');});
 </script></body></html>

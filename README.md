@@ -34,6 +34,15 @@ Usa il tuo **iPhone come webcam del PC** via cavo **USB** o **Wi-Fi**.
 
 > Tieni Safari in primo piano con lo schermo acceso durante lo streaming.
 
+## 💬 Discord / Zoom / Teams: l'iPhone come vera webcam
+
+1. Doppio clic su `Registra-Webcam-Virtuale.bat` (accetta come amministratore, una tantum).
+2. Nella dashboard, scheda Anteprima → **▶ Attiva webcam virtuale** (con l'iPhone LIVE).
+3. **Chiudi e riapri** Discord/Zoom/Teams → seleziona **Unity Video Capture** come videocamera.
+   (Discord: ⚙ Impostazioni → Voce e video → Videocamera.)
+
+Se hai OBS Studio, funziona anche senza registrare nulla: l'app usa la virtual camera di OBS.
+
 ## 🔌 USB vs Wi-Fi
 
 | | Wi-Fi | USB |

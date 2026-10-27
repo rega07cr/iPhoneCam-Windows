@@ -28,6 +28,7 @@ jobs:
         run: |
           pyinstaller --noconfirm --clean --onefile --name iPhoneCam `
             --add-data "dashboard.html;." --add-data "phone.html;." `
+            --collect-all pyvirtualcam `
             app.py
 
       - name: Package portable zip
