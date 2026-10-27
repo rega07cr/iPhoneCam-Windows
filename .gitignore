@@ -8,3 +8,6 @@ __pycache__/
 *.pyc
 iphone-cam-windows.zip
 server.log
+
+*.log
+*.zip
