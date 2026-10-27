@@ -320,6 +320,23 @@ class H(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
 
+def pause_exit(msg="Premi INVIO per chiudere..."):
+    # Per l'EXE: la finestra non deve sparire prima che l'utente legga l'errore.
+    try:
+        input(f"\n[iPhoneCam] {msg}")
+    except (EOFError, KeyboardInterrupt):
+        pass
+
+
+def try_listen(port):
+    srv = socketserver.ThreadingTCPServer(("0.0.0.0", port), H, bind_and_activate=False)
+    srv.allow_reuse_address = True
+    srv.daemon_threads = True
+    srv.server_bind()
+    srv.server_activate()
+    return srv
+
+
 def main():
     global PORT
     ap = argparse.ArgumentParser(description="iPhoneCam per Windows — usa l'iPhone come webcam")
@@ -336,9 +353,23 @@ def main():
     ips = lan_ips()
     cert, key = ensure_cert(ips)
 
-    with socketserver.ThreadingTCPServer(("0.0.0.0", PORT), H) as httpd:
-        httpd.allow_reuse_address = True
-        httpd.daemon_threads = True
+    httpd = None
+    for p in range(args.port, args.port + 10):
+        try:
+            httpd = try_listen(p)
+            break
+        except OSError:
+            if p == args.port:
+                print(f"[iPhoneCam] Porta {p} occupata: un'altra istanza e' gia' in esecuzione?")
+                print("[iPhoneCam] Provo le porte successive...")
+    if httpd is None:
+        print(f"[iPhoneCam] ERRORE: porte {args.port}-{args.port + 9} tutte occupate.")
+        print("[iPhoneCam] Chiudi l'altra finestra iPhoneCam (Task Manager -> iPhoneCam.exe) e riprova.")
+        return pause_exit()
+    PORT = httpd.server_address[1]
+    if PORT != args.port:
+        print(f"[iPhoneCam] Uso la porta {PORT}. Inquadra il nuovo QR!")
+    with httpd:
         if cert:
             ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             ctx.load_cert_chain(cert, key)
@@ -358,4 +389,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n[iPhoneCam] Arresto.")
+    except Exception as e:  # mai traceback nudo nella finestra dell'utente
+        print(f"\n[iPhoneCam] ERRORE: {e}")
+        print("[iPhoneCam] Se il problema persiste, apri un issue su GitHub con questo messaggio.")
+        pause_exit() 
