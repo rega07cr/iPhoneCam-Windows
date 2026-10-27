@@ -44,6 +44,18 @@ Usa il tuo **iPhone come webcam del PC** via cavo **USB** o **Wi-Fi**.
 
 > Tieni Safari in primo piano con lo schermo acceso durante lo streaming.
 
+## 🛡️ Windows mostra un avviso antivirus? (falso positivo)
+
+L'EXE **non è firmato** (i certificati costano centinaia di €/anno) ed è compilato con PyInstaller:
+Defender lo segnala spesso come `Trojan:Win32/Wacatac` anche se è pulito. Il codice è tutto pubblico qui su GitHub.
+
+- **Verifica l'integrità**: ogni release ha il file `SHA256SUMS.txt`. Su PowerShell:
+  `Get-FileHash .\iPhoneCam.exe -Algorithm SHA256` e confronta il valore.
+- **Ripristina**: Sicurezza di Windows → Protezione da virus e minacce → Cronologia protezione → Ripristina,
+  poi aggiungi un'esclusione **solo per la cartella** dove tieni l'EXE.
+- **Zero avvisi garantiti**: usa i sorgenti invece dell'EXE — `Avvia-iPhoneCam.bat`
+  (serve [Python 3.12](https://www.python.org/) + `py -m pip install -r requirements.txt`).
+
 ## 💬 Discord / Zoom / Teams: l'iPhone come vera webcam
 
 1. Doppio clic su `Registra-Webcam-Virtuale.bat` (accetta come amministratore, una tantum).

@@ -22,7 +22,7 @@ import time
 import webbrowser
 from urllib.parse import urlparse, parse_qs
 
-__version__ = "2.5.0"
+__version__ = "2.5.1"
 
 PORT_GUI = 8080  # dashboard HTTP solo-locale per la finestra integrata
 

@@ -27,7 +27,7 @@ jobs:
       - name: Build EXE
         run: |
           pyinstaller --noconfirm --clean --onefile --windowed --name iPhoneCam `
-            --icon assets/icon.ico `
+            --icon assets/icon.ico --version-file version-info.txt `
             --add-data "dashboard.html;." --add-data "phone.html;." `
             --add-data "driver/UnityCapture;driver/UnityCapture" `
             --collect-all pyvirtualcam `
@@ -40,6 +40,8 @@ jobs:
           Copy-Item LICENSE dist/
           Compress-Archive -Path dist/iPhoneCam.exe, dist/README.md, dist/LICENSE `
             -DestinationPath iPhoneCam-portable.zip -Force
+          (Get-FileHash dist/iPhoneCam.exe -Algorithm SHA256).Hash + '  iPhoneCam.exe' | Out-File SHA256SUMS.txt -Encoding ascii
+          (Get-FileHash iPhoneCam-portable.zip -Algorithm SHA256).Hash + '  iPhoneCam-portable.zip' | Out-File SHA256SUMS.txt -Encoding ascii -Append
 
       - uses: actions/upload-artifact@v4
         with:
@@ -47,6 +49,7 @@ jobs:
           path: |
             dist/iPhoneCam.exe
             iPhoneCam-portable.zip
+            SHA256SUMS.txt
 
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
@@ -55,3 +58,4 @@ jobs:
           files: |
             dist/iPhoneCam.exe
             iPhoneCam-portable.zip
+            SHA256SUMS.txt

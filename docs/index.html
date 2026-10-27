@@ -43,7 +43,7 @@ footer{border-top:1px solid rgba(255,150,200,.22);padding:26px 0 90px;color:#b9a
 <div class="moon"></div>
 <svg class="mountains" viewBox="0 0 1440 300" preserveAspectRatio="none"><path d="M0 300V180L180 60 340 160 520 40 700 170 880 70 1060 180 1240 90 1440 190V300Z" fill="#241b4d" opacity=".85"/><path d="M0 300V230L220 140 420 210 640 130 860 220 1080 150 1300 220 1440 180V300Z" fill="#160f38"/><g fill="#ff7ab8" opacity=".85"><circle cx="150" cy="222" r="30"/><circle cx="190" cy="210" r="22"/><circle cx="112" cy="210" r="18"/><circle cx="1290" cy="208" r="32"/><circle cx="1330" cy="195" r="22"/><circle cx="1250" cy="195" r="18"/></g><g fill="#3a2a1a"><rect x="146" y="232" width="9" height="34" rx="3"/><rect x="1286" y="220" width="9" height="36" rx="3"/></g></svg>
 <header><div class="wrap"><svg width="34" height="34" viewBox="0 0 96 96"><rect x="26" y="6" width="44" height="84" rx="12" fill="#1b1440" stroke="#ff7ab8" stroke-width="5"/><circle cx="48" cy="44" r="14" fill="#0b1020" stroke="#a5b4fc" stroke-width="4"/><circle cx="48" cy="44" r="6" fill="#22d3ee"/></svg><b>iPhoneCam</b>
-<nav><a href="#funzioni">Funzioni</a><a href="#come">Come funziona</a><a href="#virtual">Discord &amp; co.</a><a href="#faq">FAQ</a><a href="#download">Download</a></nav></div></header>
+<nav><a href="#funzioni">Funzioni</a><a href="#come">Come funziona</a><a href="#virtual">Discord &amp; co.</a><a href="#bug">Bug</a><a href="#sicurezza">Antivirus</a><a href="#faq">FAQ</a><a href="#download">Download</a></nav></div></header>
 <div class="wrap">
 
 <div class="hero">
@@ -106,6 +106,9 @@ footer{border-top:1px solid rgba(255,150,200,.22);padding:26px 0 90px;color:#b9a
 <div class="card"><h3>8 · Zoom/lenti non cambiano niente</h3><p><b>Tutorial:</b> i comandi lente funzionano solo con camera posteriore e iPhone Pro; controlla in 📷 Camera la riga "Supporto telefono"; se dice "base", Safari non espone quello zoom su quel modello.</p></div>
 </div>
 
+<h2 id="sicurezza">🛡️ Windows mostra un avviso antivirus?</h2><p class="sub">È un falso positivo noto: l'EXE non è firmato ed è compilato con PyInstaller. Il codice è tutto pubblico.</p>
+<div class="card"><h3>Perché succede e cosa fare</h3><p>Defender segnala spesso qualsiasi EXE PyInstaller non firmato come <code>Trojan:Win32/Wacatac</code>. Verifica l'integrità: ogni release include <a id="dlHash" href="https://github.com/rega07cr/iPhoneCam-Windows/releases/latest">SHA256SUMS.txt</a> — confronta con <code>Get-FileHash .\iPhoneCam.exe -Algorithm SHA256</code> in PowerShell. Poi ripristina il file dalla Cronologia protezione e aggiungi un'esclusione solo per la sua cartella. <b>Alternativa senza alcun avviso:</b> scarica i sorgenti (.zip) ed esegui <code>Avvia-iPhoneCam.bat</code> con Python 3.12.</p></div>
+
 <h2 id="faq">❓ Domande frequenti</h2>
 <details><summary>Devo installare qualcosa sull'iPhone?</summary><p>No. Solo Safari: inquadri il QR con la Fotocamera, apri il link, consenti l'accesso alla fotocamera. Fine.</p></details>
 <details><summary>Perché devo accettare un certificato?</summary><p>iOS permette l'accesso alla fotocamera solo su connessioni sicure (HTTPS). L'app genera un certificato in locale, sulla tua rete: lo accetti una volta sola.</p></details>
@@ -126,6 +129,7 @@ fetch('https://api.github.com/repos/rega07cr/iPhoneCam-Windows/releases/latest')
   const exe=(j.assets||[]).find(a=>/\.exe$/i.test(a.name))||(j.assets||[]).find(a=>/portable.*\.zip$/i.test(a.name));
   if(exe){document.getElementById('dlMain').href=exe.browser_download_url;document.getElementById('dlExe').href=exe.browser_download_url;
     document.getElementById('dlNote').textContent='Download diretto: '+exe.name+' ('+(exe.size/1048576).toFixed(1)+' MB).';
-    document.getElementById('dlInfo').textContent='Versione '+j.tag_name+' · Windows 10/11 a 64 bit · nessun installer.';}
+    document.getElementById('dlInfo').textContent='Versione '+j.tag_name+' · Windows 10/11 a 64 bit · nessun installer.';
+    const sums=(j.assets||[]).find(a=>/SHA256/i.test(a.name));if(sums)document.getElementById('dlHash').href=sums.browser_download_url;}
 }).catch(()=>{});
 </script></body></html>
