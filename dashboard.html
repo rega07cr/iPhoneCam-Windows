@@ -1,6 +1,6 @@
 <!doctype html><html lang="it" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>iPhoneCam per Windows</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
 <style>
 :root,[data-theme="dark"]{--bg:#0b1020;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--txt:#eef2ff;--mut:#9aa4c7;--acc:#7c6cff;--acc2:#22d3ee;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--in:#0a0f22}
 [data-theme="light"]{--bg:#eef1f8;--card:#ffffff;--line:#dbe1f0;--txt:#131a30;--mut:#5b6a8f;--in:#f2f5fb}
@@ -45,7 +45,7 @@ body.popout .wrap{max-width:100%;padding:0}body.popout .top,body.popout .nav,bod
 
 <div class="tabpage on" id="pg-prev"><div class="grid">
 <div class="card" id="sideCol"><h2>1 · Collega l'iPhone</h2><p>Inquadra il QR con la <b>Fotocamera</b> → apri in <b>Safari</b> → accetta il certificato una volta → <b>Consenti</b> fotocamera.</p>
-<div id="qr">…</div><div class="urlbox" id="urlBox">…</div>
+<div id="qr"><img id="qrimg" src="/api/qr" alt="QR per collegare l'iPhone" style="max-width:100%;border-radius:8px"></div><div class="urlbox" id="urlBox">…</div>
 <div class="row"><button class="act" id="copy">Copia link</button><button class="ghost" id="dlqr">Scarica QR</button><button class="ghost" id="regen">Nuovo codice</button></div>
 <div class="steps"><div class="step" id="s1"><b>①</b>QR pronto</div><div class="step" id="s2"><b>②</b>iPhone</div><div class="step" id="s3"><b>③</b>Live</div></div></div>
 <div>
@@ -103,12 +103,12 @@ let INFO=null,pc=null,connected=false,lastSdp='',iceN=0,evtN=0,rec=null,recChunk
 if(SET.mirror)$('preview').classList.add('mirror');
 async function api(p,o){const r=await fetch(p,Object.assign({headers:{'Content-Type':'application/json'}},o||{}));return r.json();}
 async function info(){try{INFO=await(await fetch('/api/info')).json();}catch{INFO={ips:['192.168.1.10'],port:4443,token:'DEMO',version:'demo',pcOnline:false};}
-$('ver').textContent='v'+(INFO.version||'?');renderQR();$('popUrl').textContent=`https://127.0.0.1:${INFO.port}/?popout=1`;$('ips').innerHTML='IP del PC:<br><b>'+INFO.ips.join('<br>')+'</b>';}
+$('ver').textContent='v'+(INFO.version||'?');renderQR();$('popUrl').textContent=`http://127.0.0.1:${INFO.guiPort||8080}/?popout=1`;$('ips').innerHTML='IP del PC:<br><b>'+INFO.ips.join('<br>')+'</b>';}
 function renderQR(){const u=`https://${INFO.ips[0]}:${INFO.port}/phone?t=${INFO.token}`;$('urlBox').textContent=u;
-try{$('qr').innerHTML='';new QRCode($('qr'),{text:u,width:200,height:200,correctLevel:1});}catch{$('qr').innerHTML='<p style=color:#333>'+u+'</p>';}
+const qi=$('qrimg');if(qi){qi.src='/api/qr?ts='+Date.now();qi.onerror=()=>{$('qr').innerHTML='<p style=color:#333>QR non generato: apri sul telefono<br>'+u+'</p>';};}
 $('s1').classList.add('on');}
 $('copy').onclick=async()=>{await navigator.clipboard.writeText($('urlBox').textContent);log('Link copiato');};
-$('dlqr').onclick=()=>{const c=$('qr').querySelector('canvas'),i=$('qr').querySelector('img');const a=document.createElement('a');a.download='iphone-cam-qr.png';a.href=c?c.toDataURL():(i?i.src:'#');a.click();};
+$('dlqr').onclick=()=>{const a=document.createElement('a');a.href='/api/qr';a.download='iphone-cam-qr.png';a.click();};
 $('regen').onclick=async()=>{const r=await api('/api/regen',{method:'POST'});INFO.token=r.token;resetPeer();setStatus(false,'Nuovo codice: inquadra il QR');renderQR();log('Codice rigenerato');};
 function setStatus(ok,t){$('status').textContent=t;$('pill').textContent=ok?'LIVE':'in attesa';$('dot').className='dot'+(ok?' ok':'');['bSnap','bSnapR','bRec','cSwitch','cTorch','cQual','cPing'].forEach(id=>$(id).disabled=!ok);}
 function resetPeer(){try{pc&&pc.close();}catch{}pc=null;connected=false;lastSdp='';iceN=0;$('preview').srcObject=null;['s2','s3'].forEach(s=>$(s).classList.remove('on'));}

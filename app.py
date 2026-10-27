@@ -20,7 +20,9 @@ import time
 import webbrowser
 from urllib.parse import urlparse, parse_qs
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
+
+PORT_GUI = 8080  # dashboard HTTP solo-locale per la finestra integrata
 
 # ----------------------------------------------------------------------------
 # Percorsi (compatibile PyInstaller --onefile: i file dati finiscono in _MEIPASS)
@@ -185,6 +187,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                     "version": __version__,
                     "ips": ips,
                     "port": PORT,
+                    "guiPort": PORT_GUI,
                     "token": TOKEN,
                     "phoneUrl": f"https://{ips[0]}:{PORT}/phone?t={TOKEN}",
                     "pcOnline": (time.time() - store["pc_seen"]) < 12,
@@ -208,6 +211,8 @@ class H(http.server.SimpleHTTPRequestHandler):
             return self._json({"evts": store["events"][n:], "n": len(store["events"])})
         if u.path == "/api/shots":
             return self._json({"shots": store["shots"]})
+        if u.path == "/api/qr":
+            return self._qr_png()
         if u.path.startswith("/shots/"):
             name = os.path.basename(u.path[len("/shots/"):])
             if not name.lower().endswith((".jpg", ".jpeg")):
@@ -223,6 +228,26 @@ class H(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return self.wfile.write(b)
         return self.send_error(404)
+
+    def _qr_png(self):
+        # QR generato dal server: nessun CDN, funziona anche offline.
+        try:
+            import qrcode
+            from io import BytesIO
+        except ImportError:
+            return self._json({"ok": False,
+                               "err": "manca 'qrcode': py -m pip install -r requirements.txt"}, 500)
+        ips = lan_ips()
+        url = f"https://{ips[0]}:{PORT}/phone?t={TOKEN}"
+        buf = BytesIO()
+        qrcode.make(url, box_size=8, border=2).save(buf, format="PNG")
+        b = buf.getvalue()
+        self.send_response(200)
+        self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(b)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(b)
 
     # -- POST -----------------------------------------------------------
     def do_POST(self):
@@ -328,8 +353,8 @@ def pause_exit(msg="Premi INVIO per chiudere..."):
         pass
 
 
-def try_listen(port):
-    srv = socketserver.ThreadingTCPServer(("0.0.0.0", port), H, bind_and_activate=False)
+def try_listen(host, port):
+    srv = socketserver.ThreadingTCPServer((host, port), H, bind_and_activate=False)
     srv.allow_reuse_address = True
     srv.daemon_threads = True
     srv.server_bind()
@@ -337,13 +362,29 @@ def try_listen(port):
     return srv
 
 
+def open_gui(url):
+    # Finestra integrata (Edge WebView2 su Windows): tutto resta nell'app.
+    try:
+        import webview
+    except ImportError:
+        print("[iPhoneCam] 'pywebview' mancante: uso il browser. (py -m pip install -r requirements.txt)")
+        return False
+    try:
+        webview.create_window("iPhoneCam — iPhone come webcam", url, width=1180, height=860)
+        webview.start()
+        return True
+    except Exception as e:
+        print(f"[iPhoneCam] Finestra integrata non avviata ({e}): uso il browser.")
+        return False
+
+
 def main():
-    global PORT
+    global PORT, PORT_GUI
     ap = argparse.ArgumentParser(description="iPhoneCam per Windows — usa l'iPhone come webcam")
     ap.add_argument("--port", type=int, default=4443)
-    ap.add_argument("--no-browser", action="store_true")
+    ap.add_argument("--no-browser", action="store_true", help="solo server, nessuna finestra")
+    ap.add_argument("--browser", action="store_true", help="forza browser esterno invece della finestra integrata")
     args = ap.parse_args()
-    PORT = args.port
 
     # Ricostruisce la galleria da file esistenti
     for f in sorted(os.listdir(SNAP_DIR), reverse=True):
@@ -353,39 +394,66 @@ def main():
     ips = lan_ips()
     cert, key = ensure_cert(ips)
 
-    httpd = None
+    # 1) HTTPS su tutta la rete: serve all'iPhone (getUserMedia richiede TLS).
+    httpsd = None
     for p in range(args.port, args.port + 10):
         try:
-            httpd = try_listen(p)
+            httpsd = try_listen("0.0.0.0", p)
             break
         except OSError:
             if p == args.port:
                 print(f"[iPhoneCam] Porta {p} occupata: un'altra istanza e' gia' in esecuzione?")
                 print("[iPhoneCam] Provo le porte successive...")
-    if httpd is None:
+    if httpsd is None:
         print(f"[iPhoneCam] ERRORE: porte {args.port}-{args.port + 9} tutte occupate.")
         print("[iPhoneCam] Chiudi l'altra finestra iPhoneCam (Task Manager -> iPhoneCam.exe) e riprova.")
         return pause_exit()
-    PORT = httpd.server_address[1]
+    if cert:
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(cert, key)
+        httpsd.socket = ctx.wrap_socket(httpsd.socket, server_side=True)
+    else:
+        print("[iPhoneCam] ATTENZIONE: HTTPS disabilitato, su iPhone la fotocamera NON funzionera'.")
+    PORT = httpsd.server_address[1]
     if PORT != args.port:
         print(f"[iPhoneCam] Uso la porta {PORT}. Inquadra il nuovo QR!")
-    with httpd:
-        if cert:
-            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            ctx.load_cert_chain(cert, key)
-            httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
-            proto = "https"
-        else:
-            proto = "http (SOLO debug: getUserMedia su iPhone NON funzionera')"
-        print(f"[iPhoneCam v{__version__}] Dashboard: {proto}://127.0.0.1:{PORT}/")
-        print(f"[iPhoneCam v{__version__}] iPhone (stesso Wi-Fi o USB): https://{ips[0]}:{PORT}/phone?t={TOKEN}")
-        print("[iPhoneCam] Sull'iPhone accetta l'avviso certificato UNA volta, poi Consenti fotocamera.")
-        if not args.no_browser:
-            threading.Timer(1.2, lambda: webbrowser.open(f"{proto}://127.0.0.1:{PORT}/")).start()
+
+    # 2) HTTP solo su localhost: dashboard senza avvisi di certificato.
+    httpds = None
+    for p in range(8080, 8090):
         try:
-            httpd.serve_forever()
+            httpds = try_listen("127.0.0.1", p)
+            break
+        except OSError:
+            continue
+    if httpds is None:
+        print("[iPhoneCam] ERRORE: nessuna porta locale libera (8080-8089).")
+        return pause_exit()
+    PORT_GUI = httpds.server_address[1]
+
+    threading.Thread(target=httpsd.serve_forever, daemon=True).start()
+    threading.Thread(target=httpds.serve_forever, daemon=True).start()
+
+    gui_url = f"http://127.0.0.1:{PORT_GUI}/"
+    print(f"[iPhoneCam v{__version__}] App: {gui_url}")
+    print(f"[iPhoneCam v{__version__}] iPhone (stesso Wi-Fi o USB): https://{ips[0]}:{PORT}/phone?t={TOKEN}")
+    print("[iPhoneCam] Sull'iPhone accetta l'avviso certificato UNA volta, poi Consenti fotocamera.")
+
+    if args.no_browser:
+        try:
+            threading.Event().wait()
         except KeyboardInterrupt:
             print("\n[iPhoneCam] Arresto.")
+        return
+    if not args.browser and open_gui(gui_url):
+        return  # finestra chiusa -> i thread daemon terminano col processo
+    import time as _t
+    _t.sleep(1.0)
+    webbrowser.open(gui_url)
+    try:
+        threading.Event().wait()
+    except KeyboardInterrupt:
+        print("\n[iPhoneCam] Arresto.")
 
 
 if __name__ == "__main__":

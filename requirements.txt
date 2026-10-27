@@ -1,2 +1,4 @@
 cryptography>=41
+qrcode[pil]>=7
+pywebview>=5
 pyinstaller>=6

@@ -28,7 +28,7 @@ Usa il tuo **iPhone come webcam del PC** via cavo **USB** o **Wi-Fi**.
    ```bat
    Avvia-iPhoneCam.bat
    ```
-2. Si apre la dashboard su `https://127.0.0.1:4443/` (accetta l'avviso certificato).
+2. Si apre la **finestra iPhoneCam** (tutto gira nell'app, nessun browser esterno) con il QR generato offline.
 3. Inquadra il **QR** con la Fotocamera dell'iPhone → **Apri in Safari**.
 4. Sull'iPhone: accetta il certificato **una volta sola** → **Consenti** fotocamera → **LIVE** 🎉
 
@@ -45,7 +45,7 @@ Usa il tuo **iPhone come webcam del PC** via cavo **USB** o **Wi-Fi**.
 ## 🎙️ Usarla in Zoom / Teams / Meet / Discord / OBS
 
 1. Installa una volta **OBS Virtual Camera** (da OBS Studio 28+ è integrata).
-2. In OBS: sorgente **Browser** → URL `https://127.0.0.1:4443/?popout=1` → **Avvia Virtual Camera**.
+2. In OBS: sorgente **Browser** → URL `http://127.0.0.1:8080/?popout=1` (porta esatta nella dashboard) → **Avvia Virtual Camera**.
 3. In Zoom/Teams seleziona **OBS Virtual Camera** come webcam.
 
 > Il driver virtuale diretto (senza OBS) è in roadmap.
